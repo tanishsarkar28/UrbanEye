@@ -118,22 +118,14 @@ export default function Hero({ onLoginClick }: { onLoginClick?: () => void }) {
           potholes, congestion, and road defects — no new hardware, no manual
           reporting.
         </motion.p>
-        <motion.div variants={rise} className="mt-10 flex flex-wrap items-center gap-4">
-          <button
-            type="button"
-            onClick={onLoginClick}
-            className="rounded-full bg-signal px-7 py-3.5 text-sm font-bold text-paper transition-all hover:bg-signal/90 hover:shadow-lg hover:shadow-signal/25 hover:-translate-y-0.5 flex items-center space-x-2"
-          >
-            <span>Enter Command Portal</span>
-            <span>→</span>
-          </button>
+        <motion.div variants={rise} className="mt-10 flex items-center gap-6">
           <a
             href="#how-it-works"
-            className="rounded-full border border-paper/20 bg-paper/5 px-6 py-3.5 text-sm font-medium text-paper transition-colors hover:border-paper/40 hover:bg-paper/10"
+            className="rounded-full bg-signal px-6 py-3 text-sm font-medium text-paper transition-colors hover:bg-signal/90"
           >
             See how it works
           </a>
-          <span className="text-xs text-paper/40 ml-2 hidden sm:inline">Scroll to explore ↓</span>
+          <span className="text-sm text-paper/50">Scroll to explore ↓</span>
         </motion.div>
       </motion.div>
 
