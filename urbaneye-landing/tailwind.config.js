@@ -1,27 +1,14 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ["./index.html", "./src/**/*.{js,jsx}"],
   theme: {
     extend: {
       colors: {
-        gov: {
-          navy: '#0b2545',
-          navyDark: '#07162c',
-          blue: '#134074',
-          accent: '#1d70b8',
-          light: '#f4f6f8',
-          border: '#d9e2ec',
-          amber: '#d97706',
-          red: '#dc2626',
-          emerald: '#059669',
-        },
         ink: "#10233D",
         paper: "#F3F4F1",
         signal: "#1E7F73",
-        amberCustom: "#D98E04",
+        amber: "#D98E04",
+        slate: "#5B6B7A",
         line: "#DADDD6",
       },
       fontFamily: {
@@ -34,4 +21,4 @@ export default {
     },
   },
   plugins: [],
-}
+};

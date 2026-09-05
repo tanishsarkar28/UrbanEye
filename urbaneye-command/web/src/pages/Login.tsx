@@ -5,9 +5,10 @@ import { User } from '../types';
 
 interface LoginProps {
   onLoginSuccess: (user: User, token: string) => void;
+  onBack?: () => void;
 }
 
-export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
+export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBack }) => {
   const [email, setEmail] = useState('head.kapurthala@urbaneye.gov.in');
   const [password, setPassword] = useState('UrbanEye@2026');
   const [loading, setLoading] = useState(false);
@@ -43,6 +44,17 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       </div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+        {onBack && (
+          <div className="mb-4">
+            <button
+              type="button"
+              onClick={onBack}
+              className="text-xs text-slate-400 hover:text-white flex items-center space-x-1.5 transition px-2 py-1 rounded hover:bg-slate-800/50"
+            >
+              <span>← Back to Overview</span>
+            </button>
+          </div>
+        )}
         <div className="flex justify-center">
           <div className="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 shadow-lg">
             <Shield className="w-8 h-8 text-amber-400" />

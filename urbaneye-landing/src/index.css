@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body {
+  font-family: "IBM Plex Sans", sans-serif;
+  color: #10233d;
+}
+
+.font-display {
+  font-family: "Space Grotesk", sans-serif;
+}
+
+::selection {
+  background: #1e7f73;
+  color: #f3f4f1;
+}

@@ -11,6 +11,7 @@ import { NationalOverviewView } from './components/NationalOverviewView';
 import { StateOverviewView } from './components/StateOverviewView';
 import { DefectDetailModal } from './components/DefectDetailModal';
 import { Login } from './pages/Login';
+import { LandingPage } from './pages/LandingPage';
 import { RefreshCw, Radio, BellRing, Sparkles, ArrowLeft } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -18,6 +19,7 @@ export const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('urbaneye_token'));
   const [authLoading, setAuthLoading] = useState(true);
+  const [isLoginView, setIsLoginView] = useState(false);
 
   // Navigation / Scope State
   const [viewMode, setViewMode] = useState<'NATIONAL' | 'STATE' | 'DISTRICT'>('DISTRICT');
@@ -218,6 +220,7 @@ export const App: React.FC = () => {
     setSelectedState(null);
     setEvents([]);
     setSelectedEventForDetail(null);
+    setIsLoginView(false);
   };
 
   // Loading Screen
@@ -232,9 +235,21 @@ export const App: React.FC = () => {
     );
   }
 
-  // Unauthenticated -> Login View
+  // Unauthenticated -> Landing Page or Login View
   if (!user) {
-    return <Login onLoginSuccess={(u, t) => { setUser(u); setToken(t); }} />;
+    if (isLoginView) {
+      return (
+        <Login
+          onLoginSuccess={(u, t) => {
+            setUser(u);
+            setToken(t);
+            setIsLoginView(false);
+          }}
+          onBack={() => setIsLoginView(false)}
+        />
+      );
+    }
+    return <LandingPage onLoginClick={() => setIsLoginView(true)} />;
   }
 
   // Breadcrumbs Generator
