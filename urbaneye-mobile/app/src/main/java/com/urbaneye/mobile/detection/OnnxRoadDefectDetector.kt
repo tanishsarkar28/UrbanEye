@@ -164,9 +164,14 @@ class OnnxRoadDefectDetector(
                     // Road surface sanity check (valid horizon & perspective geometry)
                     if (SanityFilter.isValidRoadDefect(box)) {
                         val mappedType = when (maxClassIdx) {
-                            3 -> "POTHOLE"                       // D40
-                            0, 1, 2 -> "ROAD_CRACK"               // D00, D10, D20
-                            else -> "SURFACE_DAMAGE"             // D43, D44, D50
+                            0, 1 -> "ROAD_CRACK" // D00, D10: Linear Cracks
+                            2 -> {
+                                // D20: Alligator crack. If compact crater (aspect 0.4..2.2 and sizable), it is a disintegrated pothole
+                                val aspect = box.width() / box.height().coerceAtLeast(0.01f)
+                                if (aspect in 0.4f..2.2f && (box.width() * box.height()) > 0.035f) "POTHOLE" else "ROAD_CRACK"
+                            }
+                            3, 4, 5, 6 -> "POTHOLE" // D40 (Pothole/Rut/Depression), D43, D44, D50 (Pothole voids, craters, patch failures)
+                            else -> "POTHOLE"
                         }
                         candidates.add(RawCandidate(mappedType, maxScore, box))
                     }

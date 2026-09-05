@@ -158,4 +158,16 @@ export const api = {
     if (!res.ok) throw new Error('Failed to fetch bus sessions');
     return res.json();
   },
+
+  async unpairBusSession(sessionId: string): Promise<{ success: boolean; message: string }> {
+    const res = await fetch(`${API_BASE}/pairing/sessions/${sessionId}`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Unpair failed' }));
+      throw new Error(err.error || 'Failed to unpair bus session');
+    }
+    return res.json();
+  },
 };

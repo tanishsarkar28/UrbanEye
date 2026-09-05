@@ -24,7 +24,9 @@ yolov8n.pt
 *.apk
 urbaneye-debug.apk
 .gradle/
+.kotlin/
 urbaneye-mobile/.gradle/
+urbaneye-mobile/.kotlin/
 urbaneye-mobile/app/build/
 urbaneye-mobile/build/
 local.properties

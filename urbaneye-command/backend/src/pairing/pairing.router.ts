@@ -172,6 +172,18 @@ pairingRouter.post(
         },
       });
 
+      // Automatically retire older active sessions for the same bus label
+      await prisma.busDeviceSession.updateMany({
+        where: {
+          busLabel: busLabel.trim(),
+          status: 'PAIRED',
+          id: { not: session.id },
+        },
+        data: {
+          status: 'SUPERSEDED',
+        },
+      });
+
       // Broadcast real-time confirmation to mobile device over WebSocket room
       emitPairingConfirmed(updatedSession);
 
@@ -226,6 +238,40 @@ pairingRouter.get(
     } catch (err: any) {
       console.error('List sessions error:', err);
       res.status(500).json({ error: 'Failed to retrieve active bus sessions.' });
+    }
+  }
+);
+
+/**
+ * 5. Unpair / Revoke Bus Device Session
+ */
+pairingRouter.delete(
+  '/sessions/:id',
+  requireAuth,
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const session = await prisma.busDeviceSession.findUnique({
+        where: { id },
+      });
+
+      if (!session) {
+        res.status(404).json({ error: 'Session not found.' });
+        return;
+      }
+
+      await prisma.busDeviceSession.update({
+        where: { id },
+        data: { status: 'REVOKED' },
+      });
+
+      res.json({
+        success: true,
+        message: `Bus sensor ${session.busLabel || 'device'} un-paired successfully.`,
+      });
+    } catch (err: any) {
+      console.error('Revoke session error:', err);
+      res.status(500).json({ error: 'Failed to revoke bus session.' });
     }
   }
 );

@@ -142,14 +142,21 @@ geographyRouter.get('/national/summary', requireAuth, async (req: AuthenticatedR
           newDefects,
           assignedDefects,
           resolvedDefects,
-          activeBusesCount,
+          activeBusSessions,
         ] = await Promise.all([
           prisma.roadEvent.count({ where: { districtId: { in: districtIds } } }),
           prisma.roadEvent.count({ where: { districtId: { in: districtIds }, status: 'NEW' } }),
           prisma.roadEvent.count({ where: { districtId: { in: districtIds }, status: 'ASSIGNED_FOR_REPAIR' } }),
           prisma.roadEvent.count({ where: { districtId: { in: districtIds }, status: 'RESOLVED' } }),
-          prisma.busDeviceSession.count({ where: { districtId: { in: districtIds }, status: 'PAIRED' } }),
+          prisma.busDeviceSession.findMany({
+            where: { districtId: { in: districtIds }, status: 'PAIRED' },
+            select: { busLabel: true },
+          }),
         ]);
+
+        const activeBusesCount = new Set(
+          activeBusSessions.map((s) => s.busLabel?.trim()).filter(Boolean)
+        ).size;
 
         const unresolved = totalDefects - resolvedDefects;
         const roadHealthScore = Math.max(
@@ -253,14 +260,21 @@ geographyRouter.get('/states/:stateId/summary', requireAuth, async (req: Authent
           newDefects,
           assignedDefects,
           resolvedDefects,
-          activeBusesCount,
+          activeBusSessions,
         ] = await Promise.all([
           prisma.roadEvent.count({ where: { districtId: dist.id } }),
           prisma.roadEvent.count({ where: { districtId: dist.id, status: 'NEW' } }),
           prisma.roadEvent.count({ where: { districtId: dist.id, status: 'ASSIGNED_FOR_REPAIR' } }),
           prisma.roadEvent.count({ where: { districtId: dist.id, status: 'RESOLVED' } }),
-          prisma.busDeviceSession.count({ where: { districtId: dist.id, status: 'PAIRED' } }),
+          prisma.busDeviceSession.findMany({
+            where: { districtId: dist.id, status: 'PAIRED' },
+            select: { busLabel: true },
+          }),
         ]);
+
+        const activeBusesCount = new Set(
+          activeBusSessions.map((s) => s.busLabel?.trim()).filter(Boolean)
+        ).size;
 
         const unresolved = totalDefects - resolvedDefects;
         const roadHealthScore = Math.max(

@@ -407,7 +407,7 @@ eventsRouter.get(
         surfaceDamageCount,
         waterloggingCount,
         vehicleFlowCount,
-        activeBusesCount,
+        activeBusSessions,
       ] = await Promise.all([
         prisma.roadEvent.count({ where: whereClause }),
         prisma.roadEvent.count({ where: { ...whereClause, status: 'NEW' } }),
@@ -419,14 +419,19 @@ eventsRouter.get(
         prisma.roadEvent.count({ where: { ...whereClause, type: 'SURFACE_DAMAGE' } }),
         prisma.roadEvent.count({ where: { ...whereClause, type: 'WATERLOGGING' } }),
         prisma.roadEvent.count({ where: { ...whereClause, type: 'VEHICLE_FLOW' } }),
-        prisma.busDeviceSession.count({
+        prisma.busDeviceSession.findMany({
           where: {
             status: 'PAIRED',
             ...(req.scopedDistrictId ? { districtId: req.scopedDistrictId } : {}),
             ...(req.user!.role === 'STATE_ADMIN' && req.user!.stateId ? { district: { stateId: req.user!.stateId } } : {}),
           },
+          select: { busLabel: true },
         }),
       ]);
+
+      const activeBusesCount = new Set(
+        activeBusSessions.map((s) => s.busLabel?.trim()).filter(Boolean)
+      ).size;
 
       // Calculate Road Health Index (0 - 100):
       // Higher resolved ratio and lower active defects produce higher score
