@@ -1,0 +1,95 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model State {
+  id        String     @id @default(cuid())
+  code      String     @unique // e.g., MH, KA, DL
+  name      String
+  centerLat Float
+  centerLon Float
+  districts District[]
+  users     User[]
+  createdAt DateTime   @default(now())
+}
+
+model District {
+  id        String             @id @default(cuid())
+  code      String             @unique // e.g. MUMBAI_SUBURBAN, PUNE
+  name      String
+  stateId   String
+  state     State              @relation(fields: [stateId], references: [id], onDelete: Cascade)
+  centerLat Float
+  centerLon Float
+  minLat    Float?
+  maxLat    Float?
+  minLon    Float?
+  maxLon    Float?
+  users     User[]
+  sessions  BusDeviceSession[]
+  events    RoadEvent[]
+  createdAt DateTime           @default(now())
+}
+
+model User {
+  id           String      @id @default(cuid())
+  email        String      @unique
+  passwordHash String
+  name         String
+  role         String      // NATIONAL_ADMIN | STATE_ADMIN | DISTRICT_HEAD
+  stateId      String?
+  state        State?      @relation(fields: [stateId], references: [id])
+  districtId   String?
+  district     District?   @relation(fields: [districtId], references: [id])
+  reviews      RoadEvent[] @relation("UserReviewedEvents")
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model BusDeviceSession {
+  id            String      @id @default(uuid())
+  pin           String      // 6-digit numeric PIN
+  status        String      @default("PENDING") // PENDING | PAIRED | EXPIRED
+  busLabel      String?     // e.g. MH-01-CV-9821
+  routeTag      String?     // e.g. Route 335E
+  districtId    String?
+  district      District?   @relation(fields: [districtId], references: [id])
+  events        RoadEvent[]
+  createdAt     DateTime    @default(now())
+  expiresAt     DateTime
+  pairedAt      DateTime?
+  lastHeartbeat DateTime    @default(now())
+
+  @@index([pin, status])
+}
+
+model RoadEvent {
+  id               String            @id @default(uuid())
+  deviceSessionId  String
+  session          BusDeviceSession  @relation(fields: [deviceSessionId], references: [id], onDelete: Cascade)
+  busLabel         String
+  districtId       String
+  district         District          @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  type             String            // POTHOLE | ROAD_CRACK | SURFACE_DAMAGE | WATERLOGGING | VEHICLE_FLOW
+  confidence       Float
+  latitude         Float
+  longitude        Float
+  heading          Float?
+  speed            Float?
+  imageSnippet     String?           // base64 encoded compact JPEG cropped from edge camera
+  status           String            @default("NEW") // NEW | REVIEWED | ASSIGNED_FOR_REPAIR | RESOLVED
+  reviewedByUserId String?
+  reviewedByUser   User?             @relation("UserReviewedEvents", fields: [reviewedByUserId], references: [id])
+  reviewNotes      String?
+  timestamp        DateTime          @default(now())
+  createdAt        DateTime          @default(now())
+
+  @@index([districtId, status])
+  @@index([timestamp])
+  @@index([type])
+}

@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment variables & Local database
+.env
+*.env
+dev.db
+dev.db-journal
+
+# Build outputs
+dist/
+build/
+urbaneye-command/backend/dist/
+urbaneye-command/web/dist/
+
+# Heavy Machine Learning Datasets & Weights
+Road Defect.v1i.yolov8/
+runs/
+*.pt
+yolov8n.pt
+
+# Mobile APK & Gradle caches (Keep source code in urbaneye-mobile)
+*.apk
+urbaneye-debug.apk
+.gradle/
+urbaneye-mobile/.gradle/
+urbaneye-mobile/app/build/
+urbaneye-mobile/build/
+local.properties
+.cxx/
+
+# IDE & OS caches
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db

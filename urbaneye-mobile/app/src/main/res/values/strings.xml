@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">UrbanEye Mobile</string>
+    <string name="title_pairing">BUS SENSOR PAIRING</string>
+    <string name="msg_enter_pin">Enter this 6-digit PIN on the UrbanEye Command portal to link this bus session:</string>
+    <string name="status_unpaired">UNPAIRED — READY</string>
+    <string name="status_paired">PAIRED &amp; PATROLLING</string>
+    <string name="gps_lock">GPS LOCK: ACQUIRED</string>
+    <string name="gps_no_lock">GPS: ACQUIRING...</string>
+</resources>

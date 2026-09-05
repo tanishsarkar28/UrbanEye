@@ -1,0 +1,3 @@
+-keep class ai.onnxruntime.** { *; }
+-keep class com.urbaneye.mobile.detection.** { *; }
+-keep class com.urbaneye.mobile.network.** { *; }

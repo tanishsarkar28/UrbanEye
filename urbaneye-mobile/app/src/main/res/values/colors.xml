@@ -1,0 +1,10 @@
+<resources>
+    <color name="gov_navy">#0B2545</color>
+    <color name="gov_navy_dark">#07162C</color>
+    <color name="gov_blue">#134074</color>
+    <color name="gov_amber">#F59E0B</color>
+    <color name="gov_red">#EF4444</color>
+    <color name="gov_emerald">#10B981</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+</resources>

@@ -1,0 +1,12 @@
+<resources>
+    <style name="Theme.UrbanEye" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/gov_navy</item>
+        <item name="colorSecondary">@color/gov_amber</item>
+        <item name="android:statusBarColor">@color/gov_navy_dark</item>
+    </style>
+
+    <style name="Theme.UrbanEye.Fullscreen" parent="Theme.UrbanEye">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+</resources>
