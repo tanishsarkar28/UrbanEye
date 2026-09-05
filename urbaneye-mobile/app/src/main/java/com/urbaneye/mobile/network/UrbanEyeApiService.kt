@@ -82,10 +82,12 @@ object NetworkClient {
         if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
             cleanUrl = "http://$cleanUrl"
         }
-        if (!cleanUrl.endsWith("/")) {
-            cleanUrl = "$cleanUrl/"
+        // Normalize: remove trailing slash first to check for /api suffix
+        cleanUrl = cleanUrl.trimEnd('/')
+        if (cleanUrl.endsWith("/api")) {
+            cleanUrl = cleanUrl.substringBeforeLast("/api")
         }
-        baseUrl = cleanUrl
+        baseUrl = "$cleanUrl/"
         _apiService = null // Re-create on next access
     }
 
