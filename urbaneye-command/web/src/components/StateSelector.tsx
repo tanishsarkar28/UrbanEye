@@ -29,8 +29,8 @@ export const StateSelector: React.FC<StateSelectorProps> = ({ states, onSelectSt
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {states.map((st) => {
           const totalDistricts = st.districts?.length || 0;
-          const totalEvents = st.districts?.reduce((acc, d) => acc + (d._count?.events || 0), 0) || 0;
-          const totalBuses = st.districts?.reduce((acc, d) => acc + (d._count?.sessions || 0), 0) || 0;
+          const totalEvents = st.districts?.reduce((acc: number, d: any) => acc + (d._count?.events || 0), 0) || 0;
+          const totalBuses = st.districts?.reduce((acc: number, d: any) => acc + (d._count?.sessions || 0), 0) || 0;
 
           return (
             <div

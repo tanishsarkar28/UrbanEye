@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "UrbanEye - Real-time Edge AI Road Defect Intelligence Platform",
   "scripts": {
-    "install:all": "npm install --prefix urbaneye-command/web && npm install --prefix urbaneye-command/backend",
+    "install:all": "npm install --include=dev --prefix urbaneye-command/web && npm install --include=dev --prefix urbaneye-command/backend",
     "build:web": "npm run build --prefix urbaneye-command/web",
     "build:backend": "npm run prisma:generate --prefix urbaneye-command/backend && npm run prisma:migrate --prefix urbaneye-command/backend && npm run seed --prefix urbaneye-command/backend && npm run build --prefix urbaneye-command/backend",
     "build": "npm run build:web && npm run build:backend",
