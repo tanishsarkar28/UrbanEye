@@ -28,33 +28,66 @@ const steps = [
   },
 ];
 
-export default function HowItWorks() {
+interface HowItWorksProps {
+  theme?: 'dark' | 'light';
+}
+
+export default function HowItWorks({ theme = 'dark' }: HowItWorksProps) {
+  const isDark = theme === 'dark';
+
   return (
-    <section id="how-it-works" className="bg-ink px-6 py-28 text-paper md:px-12">
+    <section
+      id="how-it-works"
+      className={`border-b px-6 py-28 md:px-12 transition-colors duration-300 ${
+        isDark ? 'bg-[#081325] border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+      }`}
+    >
       <div className="mx-auto max-w-6xl">
         <motion.h2
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.6 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="font-display mb-16 max-w-xl text-3xl font-medium leading-tight md:text-4xl"
+          className={`font-display mb-16 max-w-xl text-3xl font-bold leading-tight md:text-4xl ${
+            isDark ? 'text-white' : 'text-slate-900'
+          }`}
         >
           One route, five handoffs, no manual reporting.
         </motion.h2>
 
         <div className="flex flex-col">
-          {steps.map((step, i) => (
+          {steps.map((step) => (
             <motion.div
               key={step.n}
               initial={{ opacity: 0.25 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true, amount: 0.6 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className="grid grid-cols-[auto_1fr] gap-6 border-t border-paper/15 py-8 md:grid-cols-[80px_1fr_1.4fr] md:gap-10"
+              className={`grid grid-cols-[auto_1fr] gap-6 border-t py-8 md:grid-cols-[80px_1fr_1.4fr] md:gap-10 ${
+                isDark ? 'border-slate-800' : 'border-slate-200'
+              }`}
             >
-              <span className="font-display text-lg text-signal">{step.n}</span>
-              <h3 className="font-display text-xl md:text-2xl">{step.title}</h3>
-              <p className="max-w-prose text-paper/65">{step.body}</p>
+              <span
+                className={`font-display text-lg font-black ${
+                  isDark ? 'text-[#2dd4bf]' : 'text-[#0f766e]'
+                }`}
+              >
+                {step.n}
+              </span>
+              <h3
+                className={`font-display text-xl font-bold md:text-2xl ${
+                  isDark ? 'text-white' : 'text-slate-900'
+                }`}
+              >
+                {step.title}
+              </h3>
+              <p
+                className={`max-w-prose leading-relaxed ${
+                  isDark ? 'text-slate-300' : 'text-slate-600'
+                }`}
+              >
+                {step.body}
+              </p>
             </motion.div>
           ))}
         </div>

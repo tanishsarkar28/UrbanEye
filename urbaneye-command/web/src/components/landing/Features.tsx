@@ -19,21 +19,38 @@ const features = [
   },
 ];
 
-export default function Features() {
+interface FeaturesProps {
+  theme?: 'dark' | 'light';
+}
+
+export default function Features({ theme = 'dark' }: FeaturesProps) {
+  const isDark = theme === 'dark';
+
   return (
-    <section className="border-b border-line bg-paper px-6 py-28 md:px-12">
+    <section
+      id="features"
+      className={`border-b px-6 py-28 md:px-12 transition-colors duration-300 ${
+        isDark ? 'bg-[#0b1b36] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+      }`}
+    >
       <div className="mx-auto max-w-6xl">
         <motion.h2
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.6 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="font-display mb-16 max-w-xl text-3xl font-medium leading-tight text-ink md:text-4xl"
+          className={`font-display mb-16 max-w-xl text-3xl font-bold leading-tight md:text-4xl ${
+            isDark ? 'text-white' : 'text-slate-900'
+          }`}
         >
           What the fleet sees, the dashboard knows.
         </motion.h2>
 
-        <div className="divide-y divide-line border-y border-line">
+        <div
+          className={`divide-y border-y ${
+            isDark ? 'divide-slate-800 border-slate-800' : 'divide-slate-200 border-slate-200'
+          }`}
+        >
           {features.map((f, i) => (
             <motion.div
               key={f.title}
@@ -43,8 +60,20 @@ export default function Features() {
               transition={{ duration: 0.5, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
               className="grid gap-3 py-10 md:grid-cols-[1fr_1.6fr] md:gap-12"
             >
-              <h3 className="font-display text-xl text-ink md:text-2xl">{f.title}</h3>
-              <p className="max-w-prose text-slate">{f.body}</p>
+              <h3
+                className={`font-display text-xl font-bold md:text-2xl ${
+                  isDark ? 'text-white' : 'text-slate-900'
+                }`}
+              >
+                {f.title}
+              </h3>
+              <p
+                className={`max-w-prose leading-relaxed ${
+                  isDark ? 'text-slate-300' : 'text-slate-600'
+                }`}
+              >
+                {f.body}
+              </p>
             </motion.div>
           ))}
         </div>

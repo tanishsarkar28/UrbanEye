@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -22,6 +23,8 @@ export default {
         paper: "#F3F4F1",
         signal: "#1E7F73",
         amberCustom: "#D98E04",
+        amber: "#D98E04",
+        slate: "#5B6B7A",
         line: "#DADDD6",
       },
       fontFamily: {

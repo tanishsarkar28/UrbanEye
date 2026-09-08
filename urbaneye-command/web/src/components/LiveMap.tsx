@@ -14,9 +14,9 @@ interface LiveMapProps {
 
 const STATUS_METADATA: Record<EventStatus, { bg: string; text: string; label: string; symbol: string }> = {
   NEW: { bg: '#dc2626', text: '#ffffff', label: 'New Defect', symbol: '!' },
-  ASSIGNED_FOR_REPAIR: { bg: '#ea580c', text: '#ffffff', label: 'Assigned for Repair', symbol: '⚙' },
-  RESOLVED: { bg: '#059669', text: '#ffffff', label: 'Resolved', symbol: '✓' },
-  REVIEWED: { bg: '#2563eb', text: '#ffffff', label: 'Reviewed', symbol: '•' },
+  ASSIGNED_FOR_REPAIR: { bg: '#d97706', text: '#ffffff', label: 'Assigned Repair', symbol: '⚙' },
+  RESOLVED: { bg: '#1E7F73', text: '#ffffff', label: 'Resolved', symbol: '✓' },
+  REVIEWED: { bg: '#475569', text: '#ffffff', label: 'Reviewed', symbol: '•' },
 };
 
 export const LiveMap: React.FC<LiveMapProps> = ({
@@ -167,7 +167,7 @@ export const LiveMap: React.FC<LiveMapProps> = ({
       const dateStr = new Date(event.timestamp).toLocaleString();
       const popupDiv = document.createElement('div');
       popupDiv.style.minWidth = '220px';
-      popupDiv.style.fontFamily = 'Inter, sans-serif';
+      popupDiv.style.fontFamily = 'Inter, -apple-system, sans-serif';
 
       popupDiv.innerHTML = `
         <div style="padding: 2px;">
@@ -203,10 +203,10 @@ export const LiveMap: React.FC<LiveMapProps> = ({
               ${statusMeta.label}
             </span>
             <button id="btn-view-detail-${event.id}" style="
-              background-color: #2563eb;
+              background-color: #10233D;
               color: #ffffff;
               border: none;
-              padding: 3px 8px;
+              padding: 4px 8px;
               border-radius: 4px;
               font-size: 10px;
               font-weight: 700;
@@ -235,33 +235,31 @@ export const LiveMap: React.FC<LiveMapProps> = ({
   }, [events, latestEventId, onSelectEvent]);
 
   return (
-    <div className="relative w-full h-full min-h-[420px] bg-slate-100 rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+    <div className="relative w-full h-full min-h-[440px] bg-slate-100 rounded-lg shadow-sm border border-slate-200 overflow-hidden">
       <div ref={mapContainerRef} className="w-full h-full" />
 
-      {/* Map Status Legend Overlay */}
-      <div className="absolute bottom-4 left-4 z-[500] bg-white/95 backdrop-blur-sm border border-slate-200 rounded-lg shadow-md p-3 text-xs">
-        <div className="font-bold text-slate-800 mb-1.5 flex items-center justify-between">
-          <div className="flex items-center">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
-            <span>Live Defect Status Legend</span>
-          </div>
+      {/* Map Status Legend Overlay (Subtle, Translucent Frosted Style) */}
+      <div className="absolute bottom-4 left-4 z-[500] bg-slate-900/85 backdrop-blur-md border border-white/10 rounded-lg shadow-lg p-2.5 text-xs text-white">
+        <div className="font-semibold text-slate-300 text-[11px] mb-1.5 flex items-center space-x-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#1E7F73] animate-pulse"></span>
+          <span>Defect Status Overlay</span>
         </div>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-600 text-[11px]">
+        <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
           <div className="flex items-center space-x-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-600 inline-block"></span>
-            <span className="font-semibold text-slate-800">Red: New Defect</span>
+            <span className="w-2 h-2 rounded-full bg-[#dc2626] inline-block shrink-0"></span>
+            <span className="text-slate-200">New Alert</span>
           </div>
           <div className="flex items-center space-x-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-orange-600 inline-block"></span>
-            <span className="font-semibold text-slate-800">Orange: Assigned Repair</span>
+            <span className="w-2 h-2 rounded-full bg-[#d97706] inline-block shrink-0"></span>
+            <span className="text-slate-200">Assigned</span>
           </div>
           <div className="flex items-center space-x-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block"></span>
-            <span className="font-semibold text-slate-800">Green: Resolved</span>
+            <span className="w-2 h-2 rounded-full bg-[#1E7F73] inline-block shrink-0"></span>
+            <span className="text-slate-200">Resolved</span>
           </div>
           <div className="flex items-center space-x-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block"></span>
-            <span className="font-semibold text-slate-800">Blue: Reviewed</span>
+            <span className="w-2 h-2 rounded-full bg-[#475569] inline-block shrink-0"></span>
+            <span className="text-slate-200">Reviewed</span>
           </div>
         </div>
       </div>

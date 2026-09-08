@@ -15,9 +15,19 @@ const stats = [
   },
 ];
 
-export default function Problem() {
+interface ProblemProps {
+  theme?: 'dark' | 'light';
+}
+
+export default function Problem({ theme = 'dark' }: ProblemProps) {
+  const isDark = theme === 'dark';
+
   return (
-    <section className="border-b border-line bg-paper px-6 py-28 md:px-12">
+    <section
+      className={`border-b px-6 py-28 md:px-12 transition-colors duration-300 ${
+        isDark ? 'bg-[#0b1b36] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+      }`}
+    >
       <div className="mx-auto max-w-6xl">
         <div className="grid gap-12 md:grid-cols-[1fr_1.4fr]">
           <motion.div
@@ -26,12 +36,17 @@ export default function Problem() {
             viewport={{ once: true, amount: 0.5 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="font-display text-3xl font-medium leading-tight text-ink md:text-4xl">
+            <h2
+              className={`font-display text-3xl font-bold leading-tight md:text-4xl ${
+                isDark ? 'text-white' : 'text-slate-900'
+              }`}
+            >
               Cities already know where the problems are.
               <br />
               They just find out too late.
             </h2>
           </motion.div>
+
           <div className="grid gap-8 sm:grid-cols-3">
             {stats.map((s, i) => (
               <motion.div
@@ -40,10 +55,22 @@ export default function Problem() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.6 }}
                 transition={{ duration: 0.6, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                className="border-t border-line pt-4"
+                className={`border-t pt-4 ${isDark ? 'border-slate-700' : 'border-slate-200'}`}
               >
-                <div className="font-display text-3xl text-signal">{s.value}</div>
-                <p className="mt-2 text-sm leading-relaxed text-slate">{s.label}</p>
+                <div
+                  className={`font-display text-3xl font-black ${
+                    isDark ? 'text-[#2dd4bf]' : 'text-[#0f766e]'
+                  }`}
+                >
+                  {s.value}
+                </div>
+                <p
+                  className={`mt-2 text-sm leading-relaxed ${
+                    isDark ? 'text-slate-300' : 'text-slate-600'
+                  }`}
+                >
+                  {s.label}
+                </p>
               </motion.div>
             ))}
           </div>

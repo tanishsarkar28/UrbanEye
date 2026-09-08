@@ -1,28 +1,32 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import L from 'leaflet';
 import { api } from '../services/api';
-import { StateSummaryItem, HierarchySummary, State } from '../types';
+import { StateSummaryItem, HierarchySummary, State, District, DistrictSummaryItem } from '../types';
 import {
-  Bus,
-  AlertTriangle,
-  Wrench,
-  CheckCircle2,
-  Activity,
-  ArrowRight,
-  RefreshCw,
-  MapPin,
-  Shield,
-  Layers,
+  Bus, CheckCircle2, Activity, ArrowRight, RefreshCw, MapPin,
+  Layers, Search, ArrowUpDown, ArrowUp, ArrowDown, Building2, ChevronRight, X,
 } from 'lucide-react';
 
 interface NationalOverviewViewProps {
   onSelectState: (state: State) => void;
+  onSelectDistrict?: (district: District) => void;
 }
 
-export const NationalOverviewView: React.FC<NationalOverviewViewProps> = ({ onSelectState }) => {
+type SortField = 'name' | 'districtsCount' | 'roadHealthScore' | 'newDefects' | 'resolutionRate';
+type SortOrder = 'asc' | 'desc';
+
+export const NationalOverviewView: React.FC<NationalOverviewViewProps> = ({
+  onSelectState, onSelectDistrict,
+}) => {
   const [loading, setLoading] = useState(true);
   const [states, setStates] = useState<StateSummaryItem[]>([]);
   const [summary, setSummary] = useState<HierarchySummary | null>(null);
+  const [sortField, setSortField] = useState<SortField>('roadHealthScore');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedStateItem, setSelectedStateItem] = useState<StateSummaryItem | null>(null);
+  const [stateDistricts, setStateDistricts] = useState<DistrictSummaryItem[]>([]);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
@@ -40,330 +44,366 @@ export const NationalOverviewView: React.FC<NationalOverviewViewProps> = ({ onSe
     }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
-  // Initialize National Leaflet Map
+  useEffect(() => {
+    if (!selectedStateItem) { setStateDistricts([]); return; }
+    let isMounted = true;
+    setLoadingDistricts(true);
+    api.getStateSummary(selectedStateItem.id)
+      .then((res) => { if (isMounted) setStateDistricts(res.districts); })
+      .catch((err) => console.error('Failed to load districts:', err))
+      .finally(() => { if (isMounted) setLoadingDistricts(false); });
+    return () => { isMounted = false; };
+  }, [selectedStateItem]);
+
+  const getHealthMeta = (score: number) => {
+    if (score >= 80) return { bg: '#1E7F73', badgeBg: 'bg-emerald-900/40 border-emerald-700 text-emerald-300', barBg: 'bg-[#1E7F73]', label: 'Optimal' };
+    if (score >= 60) return { bg: '#d97706', badgeBg: 'bg-amber-900/40 border-amber-700 text-amber-300', barBg: 'bg-amber-500', label: 'Moderate' };
+    return { bg: '#dc2626', badgeBg: 'bg-red-900/40 border-red-700 text-red-300', barBg: 'bg-red-600', label: 'Attention' };
+  };
+
   useEffect(() => {
     if (!mapContainerRef.current) return;
-
     if (!mapInstanceRef.current) {
-      const map = L.map(mapContainerRef.current, {
-        center: [22.8, 79.5], // Center of India
-        zoom: 5,
-        zoomControl: true,
-      });
-
-      // OpenStreetMap standard tiles (100% key-free, no watermarks)
+      const map = L.map(mapContainerRef.current, { center: [22.8, 79.5], zoom: 5, zoomControl: true });
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors',
-        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors', maxZoom: 19,
       }).addTo(map);
-
       const markersLayer = L.layerGroup().addTo(map);
       markersLayerRef.current = markersLayer;
       mapInstanceRef.current = map;
     }
-
     return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
+      if (mapInstanceRef.current) { mapInstanceRef.current.remove(); mapInstanceRef.current = null; }
     };
   }, []);
 
-  // Update State Markers
   useEffect(() => {
     if (!mapInstanceRef.current || !markersLayerRef.current || states.length === 0) return;
-
     const layer = markersLayerRef.current;
     layer.clearLayers();
-
     states.forEach((st) => {
-      // Custom HTML Pin for State
+      const health = getHealthMeta(st.roadHealthScore);
+      const isSelected = selectedStateItem?.id === st.id;
+      const resRate = st.totalDefects > 0 ? Math.round((st.resolvedDefects / st.totalDefects) * 100) : 100;
       const iconHtml = `
-        <div style="position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-          <div style="
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            background-color: #0f172a;
-            border: 2px solid #38bdf8;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            font-size: 11px;
-            font-weight: 800;
-            line-height: 1;
-          ">
-            <span style="color: #38bdf8; font-size: 10px;">${st.code}</span>
-            <span style="font-size: 11px; font-weight: 900; margin-top: 1px;">${st.totalDefects}</span>
+        <div style="position:relative;width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+          ${isSelected ? `<div style="position:absolute;width:56px;height:56px;border-radius:50%;border:3px solid ${health.bg};opacity:0.7;animation:pulse-ring 1.8s infinite;"></div>` : ''}
+          <div style="width:42px;height:42px;border-radius:50%;background-color:#0f172a;border:3px solid ${health.bg};box-shadow:0 4px 12px rgba(0,0,0,0.35);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;transition:transform 0.15s ease-in-out;">
+            <span style="color:#94a3b8;font-size:9px;font-weight:700;line-height:1;">${st.code}</span>
+            <span style="color:${health.bg};font-size:13px;font-weight:900;line-height:1.1;">${st.roadHealthScore}</span>
           </div>
-        </div>
-      `;
-
-      const customIcon = L.divIcon({
-        className: 'custom-state-marker',
-        html: iconHtml,
-        iconSize: [44, 44],
-        iconAnchor: [22, 22],
-        popupAnchor: [0, -22],
-      });
-
+        </div>`;
+      const customIcon = L.divIcon({ className: 'custom-state-health-marker', html: iconHtml, iconSize: [48, 48], iconAnchor: [24, 24], popupAnchor: [0, -24] });
       const marker = L.marker([st.centerLat, st.centerLon], { icon: customIcon });
-
       const popupDiv = document.createElement('div');
-      popupDiv.style.minWidth = '220px';
-      popupDiv.style.fontFamily = 'Inter, sans-serif';
+      popupDiv.style.minWidth = '240px';
+      popupDiv.style.fontFamily = 'Inter, -apple-system, sans-serif';
       popupDiv.innerHTML = `
-        <div style="padding: 2px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-            <h4 style="font-size: 13px; font-weight: 800; color: #0f172a; margin: 0;">${st.name}</h4>
-            <span style="font-size: 10px; font-weight: 700; background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px;">
-              ${st.code}
-            </span>
-          </div>
-          <div style="font-size: 11px; color: #64748b; margin-bottom: 8px;">
-            ${st.districtsCount} Operational Districts • ${st.activeBusesCount} Active Buses
-          </div>
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; font-size: 10px; margin-bottom: 10px; text-align: center;">
-            <div style="background: #fee2e2; color: #991b1b; padding: 4px; border-radius: 4px; font-weight: 700;">
-              ${st.newDefects} New
+        <div style="padding:2px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <h4 style="font-size:14px;font-weight:800;color:#0f172a;margin:0;">${st.name}</h4>
+              <span style="font-size:10px;font-weight:700;background:#e2e8f0;color:#334155;padding:1px 5px;border-radius:3px;">${st.code}</span>
             </div>
-            <div style="background: #ffedd5; color: #9a3412; padding: 4px; border-radius: 4px; font-weight: 700;">
-              ${st.assignedDefects} Asgd
-            </div>
-            <div style="background: #dcfce7; color: #166534; padding: 4px; border-radius: 4px; font-weight: 700;">
-              ${st.resolvedDefects} Rslv
-            </div>
+            <span style="font-size:11px;font-weight:800;color:${health.bg};">${health.label}</span>
           </div>
-          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; margin-bottom: 8px;">
-            <span style="color: #475569; font-weight: 600;">Road Health Index:</span>
-            <span style="font-weight: 800; color: ${st.roadHealthScore >= 80 ? '#16a34a' : '#d97706'};">
-              ${st.roadHealthScore}/100
-            </span>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:12px;">
+            <span style="color:#64748b;font-weight:500;">Road Health Index:</span>
+            <span style="font-size:14px;font-weight:900;color:#0f172a;">${st.roadHealthScore}<span style="font-size:10px;color:#94a3b8;">/100</span></span>
           </div>
-          <button id="btn-drill-state-${st.id}" style="
-            width: 100%;
-            background-color: #2563eb;
-            color: white;
-            border: none;
-            padding: 6px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
-          ">
-            Drill Down into ${st.name} →
+          <div style="width:100%;height:5px;background:#e2e8f0;border-radius:999px;overflow:hidden;margin-bottom:8px;">
+            <div style="width:${st.roadHealthScore}%;height:100%;background-color:${health.bg};"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:4px;font-size:11px;margin-bottom:8px;color:#475569;">
+            <div><strong>Districts Live:</strong> ${st.districtsCount}</div>
+            <div><strong>Active Sensors:</strong> ${st.activeBusesCount}</div>
+            <div><strong>New Defects:</strong> ${st.newDefects}</div>
+            <div><strong>Resolution:</strong> ${resRate}%</div>
+          </div>
+          <button id="btn-select-state-map-${st.id}" style="width:100%;background-color:#10233D;color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;">
+            <span>Filter to ${st.name} Districts</span> →
           </button>
-        </div>
-      `;
-
+        </div>`;
       setTimeout(() => {
-        const btn = document.getElementById(`btn-drill-state-${st.id}`);
-        if (btn) {
-          btn.onclick = () => {
-            onSelectState({
-              id: st.id,
-              code: st.code,
-              name: st.name,
-              centerLat: st.centerLat,
-              centerLon: st.centerLon,
-            });
-          };
-        }
+        const btn = document.getElementById(`btn-select-state-map-${st.id}`);
+        if (btn) btn.onclick = (e) => {
+          e.stopPropagation();
+          setSelectedStateItem(st);
+          if (mapInstanceRef.current) mapInstanceRef.current.setView([st.centerLat, st.centerLon], 7, { animate: true });
+        };
       }, 50);
-
       marker.bindPopup(popupDiv);
-      marker.on('click', () => {
-        // Can directly select or let user click popup
-      });
-
+      marker.on('click', () => setSelectedStateItem(st));
       marker.addTo(layer);
     });
-  }, [states, onSelectState]);
+  }, [states, selectedStateItem]);
+
+  const processedStates = useMemo(() => {
+    let result = states.map((st) => ({
+      ...st,
+      resolutionRate: st.totalDefects > 0 ? Math.round((st.resolvedDefects / st.totalDefects) * 100) : 100,
+    }));
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter((st) => st.name.toLowerCase().includes(q) || st.code.toLowerCase().includes(q));
+    }
+    result.sort((a, b) => {
+      let valA: any = (a as any)[sortField];
+      let valB: any = (b as any)[sortField];
+      if (typeof valA === 'string') { valA = valA.toLowerCase(); valB = valB.toLowerCase(); }
+      if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
+      if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return result;
+  }, [states, searchQuery, sortField, sortOrder]);
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) setSortOrder((p) => (p === 'asc' ? 'desc' : 'asc'));
+    else { setSortField(field); setSortOrder(field === 'name' ? 'asc' : 'desc'); }
+  };
+
+  const renderSortIndicator = (field: SortField) => {
+    if (sortField !== field) return <ArrowUpDown className="w-3 h-3 text-slate-500 ml-1 opacity-60" />;
+    return sortOrder === 'asc'
+      ? <ArrowUp className="w-3 h-3 text-slate-200 ml-1" />
+      : <ArrowDown className="w-3 h-3 text-slate-200 ml-1" />;
+  };
+
+  const handleOpenDistrict = (dist: DistrictSummaryItem) => {
+    if (onSelectDistrict) {
+      onSelectDistrict({ id: dist.id, code: dist.code, name: dist.name, stateId: selectedStateItem?.id || '', centerLat: dist.centerLat, centerLon: dist.centerLon });
+    } else if (selectedStateItem) {
+      onSelectState({ id: selectedStateItem.id, code: selectedStateItem.code, name: selectedStateItem.name, centerLat: selectedStateItem.centerLat, centerLon: selectedStateItem.centerLon });
+    }
+  };
+
+  /* ── dark tokens ── */
+  const card     = 'bg-slate-800 border-slate-700';
+  const miniCard = 'bg-slate-900/60 border-slate-700';
+  const label    = 'text-slate-400';
+  const numClr   = 'text-white';
+  const hint     = 'text-slate-500';
 
   return (
     <div className="space-y-5">
-      {/* Top Banner & Summary Strip */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+      {/* ── Top Summary Strip ──────────────────────────────────────── */}
+      <div className={`rounded-xl border shadow-sm p-5 ${card}`}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
           <div>
             <div className="flex items-center space-x-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
-                MoRTH National Directorate
-              </span>
-              <span className="text-xs font-semibold text-slate-500">Live Highway Surveillance</span>
+              <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#10233D] text-white tracking-wide">MoRTH National Directorate</span>
+              <span className={`text-xs font-semibold ${label}`}>Live Highway Surveillance</span>
             </div>
-            <h1 className="text-xl font-black text-slate-900 tracking-tight mt-1">
-              All-India Edge-AI Road Intelligence Surveillance
-            </h1>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Live nation-wide aggregate rollups synthesized from continuous bus-mounted edge-AI camera inference.
-            </p>
+            <h1 className={`text-xl font-black tracking-tight mt-1 ${numClr}`}>National Road Network Health &amp; Surveillance</h1>
+            <p className={`text-xs mt-0.5 ${hint}`}>Live state-level telemetry synthesized from continuous bus-mounted edge-AI camera inference across operational transit fleets.</p>
           </div>
-
           <button
-            onClick={loadData}
-            disabled={loading}
-            className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 transition flex items-center space-x-1.5 self-start sm:self-auto"
+            onClick={loadData} disabled={loading}
+            className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-600 bg-slate-700 hover:bg-slate-600 text-slate-200 transition flex items-center space-x-1.5 self-start sm:self-auto shadow-sm"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             <span>Sync National Feed</span>
           </button>
         </div>
 
-        {/* National Summary Counters Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-            <span className="text-[11px] font-semibold text-slate-500 flex items-center space-x-1 mb-1">
-              <Bus className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Active Bus Patrols</span>
-            </span>
-            <div className="text-2xl font-black text-slate-900">
-              {summary?.totalActiveBuses || 0}
-            </div>
-            <span className="text-[10px] text-slate-400">Nationwide Fleet Sensors</span>
-          </div>
-
-          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-            <span className="text-[11px] font-semibold text-slate-500 flex items-center space-x-1 mb-1">
-              <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
-              <span>New Road Defects</span>
-            </span>
-            <div className="text-2xl font-black text-red-600">
-              {summary?.totalNewDefects || 0}
-            </div>
-            <span className="text-[10px] text-slate-400">Pending Authority Review</span>
-          </div>
-
-          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-            <span className="text-[11px] font-semibold text-slate-500 flex items-center space-x-1 mb-1">
-              <Wrench className="w-3.5 h-3.5 text-orange-600" />
-              <span>Assigned for Repair</span>
-            </span>
-            <div className="text-2xl font-black text-orange-600">
-              {summary?.totalAssignedDefects || 0}
-            </div>
-            <span className="text-[10px] text-slate-400">PWD Work Orders Issued</span>
-          </div>
-
-          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-            <span className="text-[11px] font-semibold text-slate-500 flex items-center space-x-1 mb-1">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Defects Resolved</span>
-            </span>
-            <div className="text-2xl font-black text-emerald-600">
-              {summary?.totalResolvedDefects || 0}
-            </div>
-            <span className="text-[10px] text-slate-400">Repaired & Verified</span>
-          </div>
-
-          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 col-span-2 sm:col-span-1">
-            <span className="text-[11px] font-semibold text-slate-500 flex items-center space-x-1 mb-1">
-              <Activity className="w-3.5 h-3.5 text-blue-600" />
-              <span>National Health Index</span>
-            </span>
-            <div className="text-2xl font-black text-blue-600">
-              {summary?.averageRoadHealthIndex || 100}
-              <span className="text-xs font-bold text-slate-400 ml-0.5">/100</span>
-            </div>
-            <span className="text-[10px] text-slate-400">Aggregated Quality Metric</span>
-          </div>
-        </div>
-      </div>
-
-      {/* National Interactive Map */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-        <div className="p-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-          <div className="flex items-center space-x-2 text-xs font-bold text-slate-900">
-            <Layers className="w-4 h-4 text-blue-600" />
-            <span>National Surveillance Map (State Rollups)</span>
-          </div>
-          <span className="text-[11px] text-slate-500 font-medium">
-            Click any state pin to inspect its district network
-          </span>
-        </div>
-        <div className="h-[460px] w-full relative">
-          <div ref={mapContainerRef} className="w-full h-full" />
-        </div>
-      </div>
-
-      {/* State Cards Grid */}
-      <div>
-        <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center space-x-2">
-          <span>State Jurisdictions ({states.length})</span>
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {states.map((st) => (
-            <div
-              key={st.id}
-              onClick={() =>
-                onSelectState({
-                  id: st.id,
-                  code: st.code,
-                  name: st.name,
-                  centerLat: st.centerLat,
-                  centerLon: st.centerLon,
-                })
-              }
-              className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:shadow-md hover:border-blue-500 transition cursor-pointer flex flex-col justify-between group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="px-2 py-0.5 rounded text-xs font-bold bg-slate-100 text-slate-800 border border-slate-200">
-                    {st.code}
-                  </span>
-                  <span className="text-xs text-blue-600 font-semibold flex items-center group-hover:translate-x-0.5 transition">
-                    Drill Down <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                  </span>
-                </div>
-
-                <h3 className="text-base font-bold text-slate-900 mb-1">{st.name}</h3>
-                <p className="text-xs text-slate-500 mb-3 flex items-center">
-                  <MapPin className="w-3.5 h-3.5 mr-1 text-slate-400" />
-                  {st.districtsCount} Operational Districts
-                </p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { icon: <Building2 className="w-3.5 h-3.5 text-slate-400" />, label: 'States Onboarded', value: states.length, hint: 'Operational state command nodes', cls: numClr },
+            { icon: <Bus className="w-3.5 h-3.5 text-[#1E7F73]" />, label: 'Active Bus Sensors', value: summary?.totalActiveBuses || 0, hint: 'Patrolling public transit fleet', cls: numClr, live: true },
+            { icon: <CheckCircle2 className="w-3.5 h-3.5 text-[#1E7F73]" />, label: 'Defects Resolved to Date', value: summary?.totalResolvedDefects || 0, hint: 'Repaired & verified by PWD', cls: numClr },
+            { icon: <Activity className="w-3.5 h-3.5 text-slate-400" />, label: 'National Road Health', value: summary?.averageRoadHealthIndex || 100, hint: 'Weighted national health index', cls: numClr, suffix: '/100' },
+          ].map((m, i) => (
+            <div key={i} className={`p-3.5 rounded-xl border ${miniCard}`}>
+              <span className={`text-[11px] font-semibold ${label} flex items-center space-x-1 mb-1`}>
+                {m.icon}<span>{m.label}</span>
+              </span>
+              <div className={`text-2xl font-black ${m.cls} flex items-baseline space-x-1.5`}>
+                <span>{m.value}</span>
+                {m.live && <span className="text-xs font-semibold text-[#1E7F73] flex items-center"><span className="w-1.5 h-1.5 rounded-full bg-[#1E7F73] mr-1 animate-pulse" />Live</span>}
+                {m.suffix && <span className="text-xs font-bold text-slate-500">{m.suffix}</span>}
               </div>
-
-              <div className="space-y-2 pt-3 border-t border-slate-100 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Active Bus Sensors:</span>
-                  <span className="font-bold text-slate-900">{st.activeBusesCount}</span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Total Defect Events:</span>
-                  <span className="font-bold text-slate-900">{st.totalDefects}</span>
-                </div>
-
-                <div className="grid grid-cols-3 gap-1 pt-1 text-[10px] text-center font-bold">
-                  <div className="bg-red-50 text-red-700 p-1.5 rounded border border-red-100">
-                    {st.newDefects} New
-                  </div>
-                  <div className="bg-orange-50 text-orange-700 p-1.5 rounded border border-orange-100">
-                    {st.assignedDefects} Asgd
-                  </div>
-                  <div className="bg-emerald-50 text-emerald-700 p-1.5 rounded border border-emerald-100">
-                    {st.resolvedDefects} Rslv
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-1">
-                  <span className="text-[11px] text-slate-500 font-medium">Road Health Index:</span>
-                  <span className="text-xs font-extrabold text-blue-700">{st.roadHealthScore}/100</span>
-                </div>
-              </div>
+              <span className={`text-[10px] ${hint}`}>{m.hint}</span>
             </div>
           ))}
         </div>
       </div>
+
+      {/* ── Map + Ranked Table ──────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Map */}
+        <div className={`lg:col-span-7 rounded-xl border shadow-sm overflow-hidden flex flex-col ${card}`}>
+          <div className={`p-3.5 border-b flex items-center justify-between ${miniCard}`}>
+            <div className="flex items-center space-x-2 text-xs font-bold text-slate-200">
+              <Layers className="w-4 h-4 text-[#1E7F73]" />
+              <span>State Road Health Distribution (Leaflet)</span>
+            </div>
+            <span className={`text-[11px] font-medium ${hint}`}>Shaded by Road Health Index</span>
+          </div>
+          <div className="h-[480px] w-full relative">
+            <div ref={mapContainerRef} className="w-full h-full" />
+            <div className="absolute bottom-4 left-4 z-[500] bg-slate-900/90 backdrop-blur-md text-white border border-white/10 rounded-lg p-2.5 text-xs shadow-lg">
+              <div className="font-semibold text-slate-200 text-[11px] mb-1.5">Road Health Index Scale</div>
+              <div className="space-y-1 text-[10px]">
+                {[['#1E7F73','80 – 100: Optimal Health'],['#d97706','60 – 79: Moderate Health'],['#dc2626','< 60: Degraded / Attention']].map(([c, t]) => (
+                  <div key={c} className="flex items-center space-x-2">
+                    <span className="w-3 h-3 rounded-full inline-block shrink-0" style={{ backgroundColor: c }} />
+                    <span className="text-slate-200 font-medium">{t}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Ranked Table */}
+        <div className={`lg:col-span-5 rounded-xl border shadow-sm flex flex-col overflow-hidden ${card}`}>
+          <div className={`p-3.5 border-b flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 ${miniCard}`}>
+            <div>
+              <h2 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center space-x-1.5">
+                <span>State Health Rankings</span>
+                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-700 text-slate-300">{processedStates.length}</span>
+              </h2>
+              <span className={`text-[11px] ${hint}`}>Click any row to filter to its live districts</span>
+            </div>
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Filter states..."
+                className="w-full sm:w-36 pl-8 pr-2.5 py-1 text-xs border border-slate-600 rounded-md focus:outline-none focus:ring-1 focus:ring-[#1E7F73] bg-slate-900 text-slate-200 placeholder:text-slate-500"
+              />
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-x-auto overflow-y-auto max-h-[440px]">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead className="bg-slate-900 text-slate-400 font-bold sticky top-0 z-10 border-b border-slate-700 text-[11px]">
+                <tr>
+                  {(['name','districtsCount','roadHealthScore','newDefects','resolutionRate'] as SortField[]).map((f, i) => (
+                    <th key={f} onClick={() => handleSort(f)}
+                      className={`py-2.5 ${i===0?'px-3':i===1?'px-2 text-center':i===4?'px-3 text-right':'px-2.5 text-right'} cursor-pointer hover:bg-slate-800 transition`}>
+                      <div className={`flex items-center ${i===0?'':'justify-'+(i===1?'center':'end')}`}>
+                        <span>{['State','Districts','Health Index','New Defects','Resolution'][i]}</span>
+                        {renderSortIndicator(f)}
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-700/60">
+                {processedStates.length === 0 ? (
+                  <tr><td colSpan={5} className={`py-8 text-center text-xs ${hint}`}>No matching state jurisdictions found.</td></tr>
+                ) : processedStates.map((st, idx) => {
+                  const health = getHealthMeta(st.roadHealthScore);
+                  const isSelected = selectedStateItem?.id === st.id;
+                  return (
+                    <tr
+                      key={st.id}
+                      onClick={() => { setSelectedStateItem(st); if (mapInstanceRef.current) mapInstanceRef.current.setView([st.centerLat, st.centerLon], 7, { animate: true }); }}
+                      className={`cursor-pointer transition ${isSelected ? 'bg-slate-700/50' : 'hover:bg-slate-700/30'}`}
+                    >
+                      <td className="py-2.5 px-3">
+                        <div className="flex items-center space-x-2">
+                          <span className={`text-[10px] font-bold ${hint} w-4`}>#{idx+1}</span>
+                          <div>
+                            <div className={`font-bold ${numClr} flex items-center space-x-1.5`}>
+                              <span>{st.name}</span>
+                              <span className="text-[10px] font-semibold bg-slate-700 text-slate-300 px-1 rounded">{st.code}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className={`py-2.5 px-2 text-center font-semibold ${label}`}>{st.districtsCount}</td>
+                      <td className="py-2.5 px-3 text-right">
+                        <div className="flex items-center justify-end space-x-1.5">
+                          <div className="w-12 h-1.5 bg-slate-700 rounded-full overflow-hidden hidden sm:block">
+                            <div className={`h-full ${health.barBg}`} style={{ width: `${st.roadHealthScore}%` }} />
+                          </div>
+                          <span className={`font-black text-xs px-1.5 py-0.5 rounded border ${health.badgeBg}`}>{st.roadHealthScore}</span>
+                        </div>
+                      </td>
+                      <td className="py-2.5 px-2.5 text-right font-semibold">
+                        {st.newDefects > 0 ? <span className="text-red-400 font-bold">{st.newDefects}</span> : <span className={hint}>0</span>}
+                      </td>
+                      <td className={`py-2.5 px-3 text-right font-bold ${label}`}>{st.resolutionRate}%</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* ── District Drilldown Panel ────────────────────────────────── */}
+      {selectedStateItem && (
+        <div className={`rounded-xl border shadow-sm p-4 ${card}`}>
+          <div className={`flex items-center justify-between pb-3 border-b border-slate-700 mb-3`}>
+            <div className="flex items-center space-x-2">
+              <MapPin className="w-4 h-4 text-[#1E7F73]" />
+              <h3 className={`text-sm font-bold ${numClr}`}>Operational Districts in {selectedStateItem.name} ({selectedStateItem.code})</h3>
+              <span className={`text-xs font-normal ${hint}`}>Click any district to open its Command page</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => onSelectState({ id: selectedStateItem.id, code: selectedStateItem.code, name: selectedStateItem.name, centerLat: selectedStateItem.centerLat, centerLon: selectedStateItem.centerLon })}
+                className="text-xs text-slate-300 hover:text-white font-semibold flex items-center px-2 py-1 rounded border border-slate-600 hover:bg-slate-700 transition"
+              >
+                <span>Full State Command View</span>
+                <ChevronRight className="w-3.5 h-3.5 ml-1" />
+              </button>
+              <button onClick={() => setSelectedStateItem(null)} className={`p-1 ${label} hover:text-slate-200 rounded`} title="Close">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {loadingDistricts ? (
+            <div className={`py-8 flex justify-center items-center text-xs ${hint} space-x-2`}>
+              <RefreshCw className="w-4 h-4 animate-spin" /><span>Loading operational districts for {selectedStateItem.name}...</span>
+            </div>
+          ) : stateDistricts.length === 0 ? (
+            <div className={`py-6 text-center text-xs ${hint}`}>No live districts found for this state.</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {stateDistricts.map((dist) => {
+                const dHealth = getHealthMeta(dist.roadHealthScore);
+                const isKapurthala = dist.code === 'PB-KAP' || dist.name.includes('Kapurthala');
+                return (
+                  <div
+                    key={dist.id}
+                    onClick={() => handleOpenDistrict(dist)}
+                    className={`p-3.5 rounded-lg border hover:border-[#1E7F73] bg-slate-900/50 hover:bg-slate-700/50 hover:shadow-md transition cursor-pointer flex flex-col justify-between group ${miniCard}`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className={`text-[11px] font-bold ${label} bg-slate-800 px-1.5 py-0.5 rounded border border-slate-600`}>{dist.code}</span>
+                        <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded border ${dHealth.badgeBg}`}>Health: {dist.roadHealthScore}/100</span>
+                      </div>
+                      <h4 className={`text-sm font-bold ${numClr} group-hover:text-white flex items-center`}>
+                        <span>{dist.name}</span>
+                        {isKapurthala && <span className="ml-1 text-[10px] font-bold text-amber-400 bg-amber-900/30 border border-amber-700/50 px-1 rounded">★ Primary Seed</span>}
+                      </h4>
+                      <div className={`mt-2 text-xs ${label} space-y-1`}>
+                        <div className="flex justify-between"><span>Active Bus Patrols:</span><span className={`font-semibold ${numClr}`}>{dist.activeBusesCount}</span></div>
+                        <div className="flex justify-between"><span>New Alerts:</span><span className="font-semibold text-red-400">{dist.newDefects}</span></div>
+                        <div className="flex justify-between"><span>Resolved:</span><span className="font-semibold text-[#1E7F73]">{dist.resolvedDefects}</span></div>
+                      </div>
+                    </div>
+                    <div className={`mt-3 pt-2.5 border-t border-slate-700 flex items-center justify-between text-xs ${label} font-semibold group-hover:text-slate-200`}>
+                      <span>Launch District Command</span>
+                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

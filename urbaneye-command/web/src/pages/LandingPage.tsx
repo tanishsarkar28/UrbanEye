@@ -13,7 +13,7 @@ interface LandingPageProps {
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
   return (
-    <main className="font-body bg-paper text-ink selection:bg-signal selection:text-paper min-h-screen">
+    <main className="font-body min-h-screen bg-[#081325] text-[#F3F4F1] selection:bg-[#1E7F73] selection:text-white">
       <Hero onLoginClick={onLoginClick} />
       <Problem />
       <HowItWorks />
