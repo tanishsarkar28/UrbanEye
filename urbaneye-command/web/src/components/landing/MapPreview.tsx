@@ -76,8 +76,8 @@ export default function MapPreview({ theme = 'dark' }: MapPreviewProps) {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, amount: 0.4 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className={`relative aspect-[4/3] w-full overflow-hidden rounded-2xl border shadow-lg ${
-            isDark ? 'bg-[#050e1c] border-slate-700' : 'bg-white border-slate-300'
+          className={`relative aspect-[4/3] w-full overflow-hidden rounded-2xl border shadow-2xl ${
+            isDark ? 'bg-[#050e1c] border-slate-700/80' : 'bg-white border-slate-300'
           }`}
         >
           <svg className="absolute inset-0 h-full w-full" aria-hidden="true">
@@ -119,6 +119,12 @@ export default function MapPreview({ theme = 'dark' }: MapPreviewProps) {
             />
           </svg>
 
+          {/* Top-right floating telemetry badge */}
+          <div className="absolute top-4 right-4 rounded-xl px-3 py-1.5 text-[11px] font-semibold backdrop-blur-md shadow-lg border bg-slate-900/85 text-white border-white/10 flex items-center space-x-2">
+            <span className="h-2 w-2 rounded-full bg-[#2dd4bf] animate-ping" />
+            <span>Telemetry Stream Active</span>
+          </div>
+
           {/* Render markers */}
           {markers.map((m, i) => (
             <motion.div
@@ -127,11 +133,12 @@ export default function MapPreview({ theme = 'dark' }: MapPreviewProps) {
               style={{ left: `${m.x}%`, top: `${m.y}%` }}
               initial={{ scale: 0 }}
               whileInView={{ scale: 1 }}
+              whileHover={{ scale: 1.3 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 + i * 0.08, type: "spring", stiffness: 300 }}
             >
               <span
-                className="relative flex h-5 w-5 items-center justify-center rounded-full shadow-md"
+                className="relative flex h-5 w-5 items-center justify-center rounded-full shadow-lg"
                 style={{ backgroundColor: colorFor[m.type] }}
               >
                 <span
@@ -145,13 +152,13 @@ export default function MapPreview({ theme = 'dark' }: MapPreviewProps) {
 
           {/* Mock floating district badge */}
           <div
-            className={`absolute bottom-4 left-4 rounded-lg px-3 py-1.5 text-xs font-semibold backdrop-blur-md shadow-md border ${
+            className={`absolute bottom-4 left-4 rounded-xl px-3.5 py-2 text-xs font-semibold backdrop-blur-md shadow-lg border ${
               isDark
-                ? 'bg-slate-900/80 text-white border-white/10'
+                ? 'bg-slate-900/85 text-white border-white/15'
                 : 'bg-white/90 text-slate-800 border-slate-200'
             }`}
           >
-            <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-[#1E7F73] animate-pulse" />
+            <span className="mr-2 inline-block h-2 w-2 rounded-full bg-[#1E7F73] animate-pulse" />
             District Command · PB-KAP / Kapurthala
           </div>
         </motion.div>
