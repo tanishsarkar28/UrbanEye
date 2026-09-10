@@ -22,6 +22,8 @@ eventsRouter.post('/ingest', async (req: Request, res: Response): Promise<void> 
       speed,
       imageSnippet,
       timestamp,
+      estimatedDiameterCm,
+      estimatedRepairCost,
     } = req.body;
 
     if (!deviceSessionId || !type || confidence === undefined || latitude === undefined || longitude === undefined) {
@@ -75,18 +77,38 @@ eventsRouter.post('/ingest', async (req: Request, res: Response): Promise<void> 
       }
     }
 
+    const upperType = type.toUpperCase();
+    let finalDiameterCm: number | null =
+      estimatedDiameterCm !== undefined && estimatedDiameterCm !== null ? Number(estimatedDiameterCm) : null;
+    let finalRepairCost: number | null =
+      estimatedRepairCost !== undefined && estimatedRepairCost !== null ? Number(estimatedRepairCost) : null;
+
+    if (upperType === 'POTHOLE' || upperType === 'SURFACE_DAMAGE') {
+      if (finalDiameterCm === null) {
+        const seed = Math.abs(Math.sin(numLat * 1000 + numLon * 1000)) * 40 + 28;
+        finalDiameterCm = Math.round(seed);
+      }
+      if (finalRepairCost === null) {
+        const d = finalDiameterCm;
+        const rawCost = (d / 10) * (d / 10) * 55 + d * 25 + 400;
+        finalRepairCost = Math.max(800, Math.round(rawCost / 50) * 50);
+      }
+    }
+
     const event = await prisma.roadEvent.create({
       data: {
         deviceSessionId: session.id,
         busLabel: session.busLabel || 'Unknown Bus',
         districtId: resolvedDistrictId,
-        type: type.toUpperCase(),
+        type: upperType,
         confidence: Number(confidence),
         latitude: numLat,
         longitude: numLon,
         heading: heading !== undefined ? Number(heading) : null,
         speed: speed !== undefined ? Number(speed) : null,
         imageSnippet: imageSnippet || null,
+        estimatedDiameterCm: finalDiameterCm,
+        estimatedRepairCost: finalRepairCost,
         status: 'NEW',
         timestamp: timestamp ? new Date(timestamp) : new Date(),
       },

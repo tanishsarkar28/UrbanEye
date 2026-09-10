@@ -38,7 +38,9 @@ data class EventIngestRequest(
     @SerializedName("heading") val heading: Float?,
     @SerializedName("speed") val speed: Float?,
     @SerializedName("imageSnippet") val imageSnippet: String?,
-    @SerializedName("timestamp") val timestamp: String
+    @SerializedName("timestamp") val timestamp: String,
+    @SerializedName("estimatedDiameterCm") val estimatedDiameterCm: Float? = null,
+    @SerializedName("estimatedRepairCost") val estimatedRepairCost: Float? = null
 )
 
 data class EventIngestResponse(

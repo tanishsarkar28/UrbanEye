@@ -81,13 +81,15 @@ model RoadEvent {
   longitude        Float
   heading          Float?
   speed            Float?
-  imageSnippet     String?           // base64 encoded compact JPEG cropped from edge camera
-  status           String            @default("NEW") // NEW | REVIEWED | ASSIGNED_FOR_REPAIR | RESOLVED
-  reviewedByUserId String?
-  reviewedByUser   User?             @relation("UserReviewedEvents", fields: [reviewedByUserId], references: [id])
-  reviewNotes      String?
-  timestamp        DateTime          @default(now())
-  createdAt        DateTime          @default(now())
+  imageSnippet        String?           // base64 encoded compact JPEG cropped from edge camera
+  estimatedDiameterCm Float?            // Estimated defect/cavity diameter in cm
+  estimatedRepairCost Float?            // Estimated PWD/NHAI repair cost in INR
+  status              String            @default("NEW") // NEW | REVIEWED | ASSIGNED_FOR_REPAIR | RESOLVED
+  reviewedByUserId    String?
+  reviewedByUser      User?             @relation("UserReviewedEvents", fields: [reviewedByUserId], references: [id])
+  reviewNotes         String?
+  timestamp           DateTime          @default(now())
+  createdAt           DateTime          @default(now())
 
   @@index([districtId, status])
   @@index([timestamp])

@@ -42,7 +42,9 @@ class EventSyncManager(private val context: Context) {
         lon: Double,
         heading: Float?,
         speed: Float?,
-        imageSnippetBase64: String?
+        imageSnippetBase64: String?,
+        estimatedDiameterCm: Float? = null,
+        estimatedRepairCost: Float? = null
     ) {
         scope.launch {
             val timestamp = isoDateFormat.format(Date())
@@ -56,7 +58,9 @@ class EventSyncManager(private val context: Context) {
                 heading = heading,
                 speed = speed,
                 imageSnippet = imageSnippetBase64,
-                timestamp = timestamp
+                timestamp = timestamp,
+                estimatedDiameterCm = estimatedDiameterCm,
+                estimatedRepairCost = estimatedRepairCost
             )
 
             if (isOnline()) {

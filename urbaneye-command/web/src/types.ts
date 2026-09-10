@@ -76,6 +76,8 @@ export interface RoadEvent {
   heading?: number | null;
   speed?: number | null;
   imageSnippet?: string | null;
+  estimatedDiameterCm?: number | null;
+  estimatedRepairCost?: number | null;
   status: EventStatus;
   reviewedByUserId?: string | null;
   reviewedByUser?: {

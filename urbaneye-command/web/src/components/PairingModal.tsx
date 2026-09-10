@@ -101,7 +101,13 @@ export const PairingModal: React.FC<PairingModalProps> = ({
 
   /* Input styles: at least 16px (text-base) on mobile to prevent iOS Safari auto-zoom */
   const inputCls =
-    'bg-slate-900 border-slate-600 text-slate-100 placeholder:text-slate-500 focus:border-[#1E7F73] focus:outline-none focus:ring-2 focus:ring-[#1E7F73]/40 min-h-[44px] text-base sm:text-xs rounded-xl';
+    'bg-slate-900 border-slate-600 text-white placeholder:text-slate-400 focus:border-[#1E7F73] focus:outline-none focus:ring-2 focus:ring-[#1E7F73]/50 min-h-[44px] rounded-xl transition';
+
+  const inputStyle: React.CSSProperties = {
+    backgroundColor: '#0f172a',
+    color: '#ffffff',
+    colorScheme: 'dark',
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
@@ -206,10 +212,11 @@ export const PairingModal: React.FC<PairingModalProps> = ({
                     value={pin}
                     onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
                     placeholder="748291"
-                    className={`w-full text-center text-3xl font-mono tracking-widest font-extrabold py-3 px-3 border-2 ${inputCls}`}
+                    className={`w-full text-center text-2xl sm:text-3xl font-mono tracking-widest font-extrabold py-3 px-3 border-2 ${inputCls}`}
+                    style={inputStyle}
                     required
                   />
-                  <p className="text-[11px] text-slate-500 mt-1 text-center">
+                  <p className="text-[11px] text-slate-400 mt-1 text-center">
                     Valid for 10 minutes from generation on the phone
                   </p>
                 </div>
@@ -224,7 +231,8 @@ export const PairingModal: React.FC<PairingModalProps> = ({
                     value={busLabel}
                     onChange={(e) => setBusLabel(e.target.value)}
                     placeholder="e.g. PB-08-LPU-001 or BEST-408"
-                    className={`w-full py-2.5 px-3 border ${inputCls}`}
+                    className={`w-full py-2.5 px-3 border text-sm text-white ${inputCls}`}
+                    style={inputStyle}
                     required
                   />
                 </div>
@@ -239,7 +247,8 @@ export const PairingModal: React.FC<PairingModalProps> = ({
                     value={routeTag}
                     onChange={(e) => setRouteTag(e.target.value)}
                     placeholder="e.g. Route 335E (Phagwara to Jalandhar)"
-                    className={`w-full py-2.5 px-3 border ${inputCls}`}
+                    className={`w-full py-2.5 px-3 border text-sm text-white ${inputCls}`}
+                    style={inputStyle}
                   />
                 </div>
 

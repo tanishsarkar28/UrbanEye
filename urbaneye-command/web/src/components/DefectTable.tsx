@@ -3,6 +3,7 @@ import { RoadEvent, EventStatus, DefectType } from '../types';
 import { Eye, CheckCircle2, Wrench, AlertTriangle, Image as ImageIcon, Trash2, MapPin, Bus, Clock } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { getCategoryColor, getCategoryDisplayName } from '../constants/detectionCategories';
+import { getPotholeCostDetails } from '../utils/potholeEstimates';
 
 interface DefectTableProps {
   events: RoadEvent[];
@@ -262,6 +263,27 @@ export const DefectTable: React.FC<DefectTableProps> = ({
                     </div>
                     {getStatusBadge(event.status)}
                   </div>
+
+                  {/* Pothole Cavity Diameter & Repair Price Pill */}
+                  {(() => {
+                    const details = getPotholeCostDetails(event);
+                    return (
+                      <div className="flex items-center justify-between gap-2 mt-1.5 pt-1.5 border-t border-slate-700/50 text-xs">
+                        <div className="flex items-center space-x-1.5">
+                          <span className="font-mono font-extrabold text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/30 text-[11px]">
+                            Ø {details.diameterCm} cm
+                          </span>
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${details.severityColor}`}>
+                            {details.severity}
+                          </span>
+                        </div>
+                        <div className="text-right flex items-center space-x-1">
+                          <span className="text-[10px] text-slate-400">Fix Est:</span>
+                          <span className="font-black text-emerald-400 text-xs">{details.formattedCost}</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 
@@ -383,6 +405,7 @@ export const DefectTable: React.FC<DefectTableProps> = ({
             <tr>
               <th className="py-2.5 px-3 w-16">Thumbnail</th>
               <th className="py-2.5 px-3">Type &amp; Confidence</th>
+              <th className="py-2.5 px-3">Est. Cavity Size &amp; Fix Price</th>
               <th className="py-2.5 px-3">Bus Unit</th>
               <th className="py-2.5 px-3">Coordinates (Lat, Lon)</th>
               <th className="py-2.5 px-3">Timestamp</th>
@@ -393,14 +416,14 @@ export const DefectTable: React.FC<DefectTableProps> = ({
           <tbody className={`divide-y ${divider}`}>
             {isLoading ? (
               <tr>
-                <td colSpan={7} className={`text-center py-10 ${emptyClr}`}>
+                <td colSpan={8} className={`text-center py-10 ${emptyClr}`}>
                   <div className={`inline-block animate-spin rounded-full h-6 w-6 border-b-2 mb-2 ${isDark ? 'border-slate-400' : 'border-slate-700'}`} />
                   <div>Syncing real-time detection events...</div>
                 </td>
               </tr>
             ) : filteredEvents.length === 0 ? (
               <tr>
-                <td colSpan={7} className={`text-center py-12 ${emptyClr}`}>
+                <td colSpan={8} className={`text-center py-12 ${emptyClr}`}>
                   <AlertTriangle className={`w-8 h-8 mx-auto mb-2 ${emptyIcon}`} />
                   <p className="font-medium">No detection events recorded for this district yet.</p>
                   <p className={`text-[11px] mt-1 ${emptyClr}`}>
@@ -442,6 +465,29 @@ export const DefectTable: React.FC<DefectTableProps> = ({
                         Conf: <strong className={isDark ? 'text-slate-300' : 'text-slate-700'}>{Math.round(event.confidence * 100)}%</strong>
                       </div>
                     </div>
+                  </td>
+
+                  {/* Est. Cavity Size & Fix Price */}
+                  <td className="py-2 px-3">
+                    {(() => {
+                      const details = getPotholeCostDetails(event);
+                      return (
+                        <div className="flex flex-col space-y-1">
+                          <div className="flex items-center space-x-1.5">
+                            <span className="font-mono text-xs font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/30">
+                              Ø {details.diameterCm} cm
+                            </span>
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${details.severityColor}`}>
+                              {details.severity}
+                            </span>
+                          </div>
+                          <div className="text-xs font-black text-emerald-400 flex items-center">
+                            <span className="text-[10px] text-slate-400 mr-1 font-normal">Fix:</span>
+                            {details.formattedCost}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </td>
 
                   {/* Bus Unit */}

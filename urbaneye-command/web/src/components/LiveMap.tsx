@@ -3,6 +3,7 @@ import L from 'leaflet';
 import { RoadEvent, EventStatus } from '../types';
 import { ChevronUp, ChevronDown, Layers } from 'lucide-react';
 import { getCategoryPriority, MAX_CATEGORY_PRIORITY } from '../constants/detectionCategories';
+import { getPotholeCostDetails } from '../utils/potholeEstimates';
 
 interface LiveMapProps {
   events: RoadEvent[];
@@ -200,8 +201,9 @@ export const LiveMap: React.FC<LiveMapProps> = ({
       });
 
       const dateStr = new Date(event.timestamp).toLocaleString();
+      const details = getPotholeCostDetails(event);
       const popupDiv = document.createElement('div');
-      popupDiv.style.minWidth = '220px';
+      popupDiv.style.minWidth = '230px';
       popupDiv.style.fontFamily = 'Inter, -apple-system, sans-serif';
 
       popupDiv.innerHTML = `
@@ -222,6 +224,12 @@ export const LiveMap: React.FC<LiveMapProps> = ({
                 </div>`
               : ''
           }
+
+          {/* Cavity & Repair Cost Bar */}
+          <div style="font-size: 11px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; background-color: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 6px; border: 1px solid #fde68a;">
+            <span>Ø ${details.diameterCm} cm (${details.severity})</span>
+            <span style="color: #059669; font-weight: 800;">Fix: ${details.formattedCost}</span>
+          </div>
 
           <div style="font-size: 11px; color: #475569; margin-bottom: 4px;">
             <strong>Bus:</strong> ${event.busLabel}

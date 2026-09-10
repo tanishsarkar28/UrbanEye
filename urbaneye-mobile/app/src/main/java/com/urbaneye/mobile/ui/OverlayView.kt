@@ -74,10 +74,12 @@ class OverlayView @JvmOverloads constructor(
             // Draw bounding rectangle
             canvas.drawRoundRect(screenRect, 8f, 8f, boxPaint)
 
-            // Draw label pill
-            val label = "${detection.type} ${(detection.confidence * 100).toInt()}%"
+            // Draw label pill with diameter and repair price
+            val diameterStr = if (detection.estimatedDiameterCm != null) " • Ø ${detection.estimatedDiameterCm} cm" else ""
+            val costStr = if (detection.estimatedRepairCost != null) " • ₹${detection.estimatedRepairCost}" else ""
+            val label = "${detection.type} ${(detection.confidence * 100).toInt()}%$diameterStr$costStr"
             val textWidth = textPaint.measureText(label)
-            val textHeight = 44f
+            val textHeight = 46f
 
             val labelRect = RectF(
                 screenRect.left,

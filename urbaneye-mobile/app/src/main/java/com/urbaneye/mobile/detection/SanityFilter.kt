@@ -13,17 +13,16 @@ object SanityFilter {
     private const val TAG = "RoadSanityFilter"
 
     // Road perspective constraints
-    private const val MIN_ROAD_HORIZON_TOP = 0.35f     // Road surface starts below horizon
-    private const val MAX_BOTTOM_EDGE = 0.98f          // Below hood of bus
-    private const val MAX_FRAME_AREA_RATIO = 0.22f     // Reject boxes > 22% of entire frame (held phone/tablet)
-    private const val MIN_FRAME_AREA_RATIO = 0.008f    // Reject tiny single-cell noise
+    private const val MIN_ROAD_HORIZON_TOP = 0.08f     // Road surface fills viewfinder when tilted forward
+    private const val MAX_BOTTOM_EDGE = 0.99f          // Below hood of bus
+    private const val MAX_FRAME_AREA_RATIO = 0.55f     // Allow close-up/prominent road craters
+    private const val MIN_FRAME_AREA_RATIO = 0.002f    // Allow smaller/distant road defects
 
     // Aspect ratio constraints: W / H
-    // Road perspective foreshortens defects horizontally; real potholes have W/H between 0.70 and 3.50
-    // Handheld smartphones in portrait have W/H around 0.45 - 0.65 (tall vertical rectangles)
-    private const val MIN_ASPECT_RATIO = 0.68f         // Reject tall portrait rectangles (H > 1.47 * W)
-    private const val MAX_ASPECT_RATIO = 3.80f         // Maximum horizontal elongation (extreme crack)
-    private const val MAX_PORTRAIT_RATIO = 1.35f       // Reject if Height / Width > 1.35
+    // Real potholes can be circular, foreshortened horizontally, or elongated along the travel axis
+    private const val MIN_ASPECT_RATIO = 0.35f         // Allow potholes elongated along travel direction
+    private const val MAX_ASPECT_RATIO = 4.20f         // Maximum horizontal elongation (long cracks)
+    private const val MAX_PORTRAIT_RATIO = 2.80f       // Allow oval potholes in portrait viewfinder orientation
 
     /**
      * Evaluates whether a candidate bounding box represents a genuine road surface defect

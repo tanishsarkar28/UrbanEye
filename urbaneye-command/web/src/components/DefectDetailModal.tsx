@@ -13,7 +13,10 @@ import {
   Sparkles,
   AlertTriangle,
   Trash2,
+  Coins,
+  Hammer,
 } from 'lucide-react';
+import { getPotholeCostDetails } from '../utils/potholeEstimates';
 
 interface DefectDetailModalProps {
   event: RoadEvent | null;
@@ -219,6 +222,62 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({
               )}
             </div>
           </div>
+
+          {/* Pavement Cavity Diameter & PWD Repair Costing Section */}
+          {(() => {
+            const details = getPotholeCostDetails(event);
+            return (
+              <div className="bg-amber-500/5 rounded-xl border border-amber-500/25 p-3.5 space-y-3">
+                <div className="flex items-center justify-between border-b border-amber-500/20 pb-2">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-7 h-7 rounded-lg bg-amber-500/15 flex items-center justify-center text-amber-600 font-bold text-xs">
+                      Ø
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-extrabold text-slate-900">Cavity Geometry &amp; Repair Estimate</h4>
+                      <p className="text-[10px] text-slate-500">Official PWD / NHAI Schedule of Rates Schedule</p>
+                    </div>
+                  </div>
+                  <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded border uppercase ${details.severityColor}`}>
+                    {details.severity} Pothole
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white p-2.5 rounded-lg border border-slate-200/80 shadow-xs">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5">
+                      Estimated Diameter
+                    </span>
+                    <div className="text-xl font-black font-mono text-slate-900 tracking-tight">
+                      Ø {details.diameterCm} <span className="text-xs font-semibold text-slate-500 font-sans">cm</span>
+                    </div>
+                    <span className="text-[10px] text-slate-400">Ground perspective scale</span>
+                  </div>
+
+                  <div className="bg-white p-2.5 rounded-lg border border-emerald-200 shadow-xs">
+                    <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider block mb-0.5">
+                      Estimated Repair Budget
+                    </span>
+                    <div className="text-xl font-black text-emerald-600 tracking-tight">
+                      {details.formattedCost}
+                    </div>
+                    <span className="text-[10px] text-slate-400">Material + labor estimate</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 pt-1 text-[11px] text-slate-600 border-t border-amber-500/15">
+                  <div className="flex items-start space-x-1.5">
+                    <Hammer className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                    <span><strong>Required Work:</strong> {details.recommendedWork}</span>
+                  </div>
+                  <div className="flex items-start space-x-1.5">
+                    <Coins className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <span><strong>Material Infill:</strong> {details.materialEstimate}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Action / Work Order Notes Section */}
           {!readOnly && (

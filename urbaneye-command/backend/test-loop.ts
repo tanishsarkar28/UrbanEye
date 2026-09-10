@@ -84,6 +84,8 @@ async function runVerification() {
     speed: 26.0,
     imageSnippet: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkWPjfDwAEcQHAbyd3gwAAAABJRU5ErkJggg==',
     timestamp: new Date().toISOString(),
+    estimatedDiameterCm: 48,
+    estimatedRepairCost: 2150,
   };
 
   const ingestRes = await fetch(`${API_BASE}/events/ingest`, {
