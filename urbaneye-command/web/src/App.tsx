@@ -306,7 +306,7 @@ const AppInner: React.FC = () => {
       {latestLiveAlert && (
         <div
           onClick={() => setSelectedEventForDetail(latestLiveAlert)}
-          className="fixed top-20 right-6 z-50 max-w-sm bg-slate-900 text-white rounded-lg shadow-2xl p-3.5 border-l-4 border-red-500 flex items-start space-x-3 cursor-pointer hover:bg-slate-800 transition"
+          className="fixed top-16 sm:top-20 left-3 right-3 sm:left-auto sm:right-6 z-50 max-w-sm mx-auto bg-slate-900 text-white rounded-xl shadow-2xl p-3.5 border-l-4 border-red-500 flex items-start space-x-3 cursor-pointer hover:bg-slate-800 transition"
         >
           <div className="w-8 h-8 rounded bg-red-500/20 text-red-400 flex items-center justify-center shrink-0">
             <BellRing className="w-4 h-4 animate-pulse" />
@@ -330,7 +330,7 @@ const AppInner: React.FC = () => {
       )}
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-3.5 sm:py-5">
         {/* VIEW 1: National Admin View */}
         {viewMode === 'NATIONAL' && (
           <NationalOverviewView
@@ -392,7 +392,7 @@ const AppInner: React.FC = () => {
                 <button
                   onClick={refreshDistrictData}
                   disabled={loadingData}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-md border transition flex items-center space-x-1 shadow-sm ${isDark ? 'border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-200' : 'border-slate-300 bg-white hover:bg-slate-50 text-slate-700'}`}
+                  className={`min-h-[40px] px-3.5 py-2 text-xs font-semibold rounded-lg border transition flex items-center space-x-1.5 shadow-sm active:scale-95 ${isDark ? 'border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-200' : 'border-slate-300 bg-white hover:bg-slate-50 text-slate-700'}`}
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${loadingData ? 'animate-spin' : ''}`} />
                   <span>Sync Feed</span>
@@ -400,7 +400,7 @@ const AppInner: React.FC = () => {
 
                 <button
                   onClick={() => setIsPairingModalOpen(true)}
-                  className="px-3.5 py-1.5 text-xs font-semibold rounded-md bg-[#10233D] hover:bg-slate-800 text-white transition flex items-center space-x-1 shadow-sm"
+                  className="min-h-[40px] px-4 py-2 text-xs font-semibold rounded-lg bg-[#10233D] hover:bg-slate-800 text-white transition flex items-center space-x-1.5 shadow-sm active:scale-95"
                 >
                   <span>+ Pair Bus (PIN)</span>
                 </button>
@@ -417,13 +417,13 @@ const AppInner: React.FC = () => {
                 <div className={`p-3 rounded-t-lg border border-b-0 flex items-center justify-between text-xs font-bold ${isDark ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-slate-200 text-slate-800'}`}>
                   <div className="flex items-center space-x-2">
                     <Radio className="w-4 h-4 text-[#1E7F73] animate-pulse" />
-                    <span>Real-Time Geospatial Defect Distribution</span>
+                    <span className="truncate">Real-Time Geospatial Defect Distribution</span>
                   </div>
-                  <span className={`text-[11px] font-semibold ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                    {events.length} active pins plotted (Click pin for Action Panel)
+                  <span className={`text-[11px] font-semibold hidden sm:inline ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    {events.length} active pins plotted
                   </span>
                 </div>
-                <div className="h-[460px]">
+                <div className="h-[360px] sm:h-[460px]">
                   <LiveMap
                     events={events}
                     centerLat={activeDistrict.centerLat}
@@ -437,7 +437,7 @@ const AppInner: React.FC = () => {
               </div>
 
               {/* Real-time Ticker / Recent Detections (4 cols) */}
-              <div className={`lg:col-span-4 rounded-lg border shadow-sm flex flex-col h-[505px] overflow-hidden ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+              <div className={`lg:col-span-4 rounded-lg border shadow-sm flex flex-col h-[380px] sm:h-[460px] lg:h-[505px] overflow-hidden ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
                 <div className={`p-3 border-b flex items-center justify-between ${isDark ? 'bg-slate-700/50 border-slate-600' : 'bg-slate-50 border-slate-200'}`}>
                   <div className={`text-xs font-bold flex items-center ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     <span className="w-2 h-2 rounded-full bg-[#1E7F73] mr-2 animate-pulse"></span>

@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { RoadEvent, EventStatus } from '../types';
+import { ChevronUp, ChevronDown, Layers } from 'lucide-react';
 
 interface LiveMapProps {
   events: RoadEvent[];
@@ -33,6 +34,9 @@ export const LiveMap: React.FC<LiveMapProps> = ({
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
   const pulseCircleRef = useRef<L.CircleMarker | null>(null);
 
+  // Collapsible legend state (collapsed by default on small screens, expanded on md+)
+  const [legendOpen, setLegendOpen] = useState(false);
+
   // Initialize Map
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -41,10 +45,13 @@ export const LiveMap: React.FC<LiveMapProps> = ({
       const map = L.map(mapContainerRef.current, {
         center: [centerLat, centerLon],
         zoom: zoom,
-        zoomControl: true,
+        zoomControl: false, // Repositioned zoom control
       });
 
-      // OpenStreetMap standard tiles (100% key-free, no watermarks)
+      // Bottom-right zoom control: thumb-safe for one-handed mobile use & prevents blocking header
+      L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+      // OpenStreetMap standard tiles
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
         maxZoom: 19,
@@ -55,7 +62,26 @@ export const LiveMap: React.FC<LiveMapProps> = ({
       mapInstanceRef.current = map;
     }
 
+    // ResizeObserver & window resize listener for immediate orientation/dimension adaptation
+    const handleResize = () => {
+      mapInstanceRef.current?.invalidateSize();
+    };
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+
+    let ro: ResizeObserver | null = null;
+    if (mapContainerRef.current && window.ResizeObserver) {
+      ro = new ResizeObserver(() => {
+        mapInstanceRef.current?.invalidateSize();
+      });
+      ro.observe(mapContainerRef.current);
+    }
+
     return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+      if (ro) ro.disconnect();
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
@@ -76,10 +102,8 @@ export const LiveMap: React.FC<LiveMapProps> = ({
     const latestEv = events.find((e) => e.id === latestEventId);
     if (!latestEv) return;
 
-    // Pan map smoothly to the incoming live event
     mapInstanceRef.current.panTo([latestEv.latitude, latestEv.longitude], { animate: true });
 
-    // Animated ripple circle marker
     if (pulseCircleRef.current) {
       pulseCircleRef.current.remove();
     }
@@ -116,19 +140,18 @@ export const LiveMap: React.FC<LiveMapProps> = ({
       const isNew = event.status === 'NEW';
       const isLatest = event.id === latestEventId;
 
-      // Custom HTML Pin with Status Color & Pulse
       const iconHtml = `
-        <div style="position: relative; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+        <div style="position: relative; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
           ${
             isLatest
-              ? `<div style="position: absolute; width: 44px; height: 44px; border-radius: 50%; background-color: ${statusMeta.bg}; opacity: 0.6; animation: pulse-ring 1.2s infinite;"></div>`
+              ? `<div style="position: absolute; width: 46px; height: 46px; border-radius: 50%; background-color: ${statusMeta.bg}; opacity: 0.6; animation: pulse-ring 1.2s infinite;"></div>`
               : isNew
-              ? `<div style="position: absolute; width: 34px; height: 34px; border-radius: 50%; background-color: ${statusMeta.bg}; opacity: 0.35; animation: pulse-ring 2s infinite;"></div>`
+              ? `<div style="position: absolute; width: 36px; height: 36px; border-radius: 50%; background-color: ${statusMeta.bg}; opacity: 0.35; animation: pulse-ring 2s infinite;"></div>`
               : ''
           }
           <div style="
-            width: 24px;
-            height: 24px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             background-color: ${statusMeta.bg};
             border: 2px solid #ffffff;
@@ -149,21 +172,19 @@ export const LiveMap: React.FC<LiveMapProps> = ({
       const customIcon = L.divIcon({
         className: 'custom-road-marker',
         html: iconHtml,
-        iconSize: [32, 32],
-        iconAnchor: [16, 16],
-        popupAnchor: [0, -16],
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
+        popupAnchor: [0, -18],
       });
 
       const marker = L.marker([event.latitude, event.longitude], { icon: customIcon });
 
-      // Interactive Click opens Detail Panel
       marker.on('click', () => {
         if (onSelectEvent) {
           onSelectEvent(event);
         }
       });
 
-      // Quick hover/click popup
       const dateStr = new Date(event.timestamp).toLocaleString();
       const popupDiv = document.createElement('div');
       popupDiv.style.minWidth = '220px';
@@ -206,11 +227,12 @@ export const LiveMap: React.FC<LiveMapProps> = ({
               background-color: #10233D;
               color: #ffffff;
               border: none;
-              padding: 4px 8px;
-              border-radius: 4px;
-              font-size: 10px;
+              padding: 6px 10px;
+              border-radius: 6px;
+              font-size: 11px;
               font-weight: 700;
               cursor: pointer;
+              min-height: 36px;
             ">
               Action Panel →
             </button>
@@ -218,7 +240,6 @@ export const LiveMap: React.FC<LiveMapProps> = ({
         </div>
       `;
 
-      // Wire button inside popup
       setTimeout(() => {
         const btn = document.getElementById(`btn-view-detail-${event.id}`);
         if (btn) {
@@ -235,33 +256,59 @@ export const LiveMap: React.FC<LiveMapProps> = ({
   }, [events, latestEventId, onSelectEvent]);
 
   return (
-    <div className="relative w-full h-full min-h-[440px] bg-slate-100 rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+    <div className="relative w-full h-full min-h-[360px] sm:min-h-[460px] bg-slate-100 rounded-lg shadow-sm border border-slate-200 overflow-hidden">
       <div ref={mapContainerRef} className="w-full h-full" />
 
-      {/* Map Status Legend Overlay (Subtle, Translucent Frosted Style) */}
-      <div className="absolute bottom-4 left-4 z-[500] bg-slate-900/85 backdrop-blur-md border border-white/10 rounded-lg shadow-lg p-2.5 text-xs text-white">
-        <div className="font-semibold text-slate-300 text-[11px] mb-1.5 flex items-center space-x-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#1E7F73] animate-pulse"></span>
-          <span>Defect Status Overlay</span>
-        </div>
-        <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
-          <div className="flex items-center space-x-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#dc2626] inline-block shrink-0"></span>
-            <span className="text-slate-200">New Alert</span>
+      {/* Map Status Legend Overlay: Collapsible on Mobile, Permanent on Desktop */}
+      <div className="absolute bottom-4 left-3 sm:left-4 z-[500] max-w-[240px]">
+        {legendOpen ? (
+          <div className="bg-slate-900/90 backdrop-blur-md border border-white/10 rounded-xl shadow-xl p-3 text-xs text-white animate-fade-in">
+            <div className="flex items-center justify-between font-semibold text-slate-200 text-[11px] mb-2 pb-1.5 border-b border-white/10">
+              <div className="flex items-center space-x-1.5">
+                <span className="w-2 h-2 rounded-full bg-[#1E7F73] animate-pulse" />
+                <span>Defect Status Overlay</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setLegendOpen(false)}
+                className="text-slate-400 hover:text-white p-1 rounded min-w-[28px] min-h-[28px] flex items-center justify-center"
+                aria-label="Collapse legend"
+              >
+                <ChevronDown className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[11px]">
+              <div className="flex items-center space-x-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#dc2626] inline-block shrink-0" />
+                <span className="text-slate-200">New Alert</span>
+              </div>
+              <div className="flex items-center space-x-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#d97706] inline-block shrink-0" />
+                <span className="text-slate-200">Assigned</span>
+              </div>
+              <div className="flex items-center space-x-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#1E7F73] inline-block shrink-0" />
+                <span className="text-slate-200">Resolved</span>
+              </div>
+              <div className="flex items-center space-x-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#475569] inline-block shrink-0" />
+                <span className="text-slate-200">Reviewed</span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center space-x-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#d97706] inline-block shrink-0"></span>
-            <span className="text-slate-200">Assigned</span>
-          </div>
-          <div className="flex items-center space-x-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#1E7F73] inline-block shrink-0"></span>
-            <span className="text-slate-200">Resolved</span>
-          </div>
-          <div className="flex items-center space-x-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#475569] inline-block shrink-0"></span>
-            <span className="text-slate-200">Reviewed</span>
-          </div>
-        </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setLegendOpen(true)}
+            className="flex items-center space-x-1.5 px-3 py-2 rounded-lg bg-slate-900/85 backdrop-blur-md border border-white/10 text-white text-xs font-semibold shadow-lg active:scale-95 transition min-h-[40px]"
+            title="Tap to expand status legend"
+            aria-label="Expand defect legend"
+          >
+            <Layers className="w-3.5 h-3.5 text-[#1E7F73]" />
+            <span>Legend</span>
+            <ChevronUp className="w-3 h-3 text-slate-400" />
+          </button>
+        )}
       </div>
     </div>
   );

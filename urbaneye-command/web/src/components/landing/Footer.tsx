@@ -6,7 +6,7 @@ interface FooterProps {
 
 export default function Footer({ onLoginClick }: FooterProps) {
   return (
-    <footer className="px-6 py-20 md:px-12 bg-[#050d1a] text-white">
+    <footer className="px-4 sm:px-6 py-14 sm:py-20 md:px-12 bg-[#050d1a] text-white">
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <motion.h2
@@ -14,7 +14,7 @@ export default function Footer({ onLoginClick }: FooterProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.6 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="font-display max-w-2xl text-3xl font-bold leading-tight md:text-4xl text-white"
+            className="font-display max-w-2xl text-2xl sm:text-3xl md:text-4xl font-bold leading-tight text-white"
           >
             The fleet is already on the road.
             <br />
@@ -31,7 +31,7 @@ export default function Footer({ onLoginClick }: FooterProps) {
               <button
                 type="button"
                 onClick={onLoginClick}
-                className="rounded-full bg-[#1E7F73] hover:bg-[#166c62] px-7 py-3 text-sm font-bold text-white transition-all hover:shadow-lg hover:shadow-[#1E7F73]/30 flex items-center space-x-2"
+                className="rounded-full bg-[#1E7F73] hover:bg-[#166c62] px-7 py-3 text-sm font-bold text-white transition-all hover:shadow-lg hover:shadow-[#1E7F73]/30 flex items-center space-x-2 min-h-[44px] active:scale-95"
               >
                 <span>Officer Portal Login</span>
                 <span>→</span>

@@ -4,6 +4,21 @@
 
 :root {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+
+/* Safe area padding utilities */
+.pt-safe { padding-top: var(--sat); }
+.pb-safe { padding-bottom: var(--sab); }
+.pl-safe { padding-left: var(--sal); }
+.pr-safe { padding-right: var(--sar); }
+
+/* Prevent accidental callout or unwanted tap highlight on mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* ── Dark scrollbars ──────────────────────────────────────────────────── */

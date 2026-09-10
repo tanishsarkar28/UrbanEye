@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { User, Role } from '../types';
-import { Bus, LogOut, Radio, UserCheck, ChevronRight, MapPin } from 'lucide-react';
+import { Bus, LogOut, Radio, UserCheck, ChevronRight, MapPin, Menu, X } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface HeaderProps {
@@ -21,6 +21,9 @@ export const Header: React.FC<HeaderProps> = ({
   currentBreadcrumbs = [],
 }) => {
   const { isDark } = useTheme();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [breadcrumbSheetOpen, setBreadcrumbSheetOpen] = useState(false);
+
   const getRoleLabel = (role: Role) => {
     switch (role) {
       case 'NATIONAL_ADMIN':
@@ -32,29 +35,45 @@ export const Header: React.FC<HeaderProps> = ({
     }
   };
 
+  const currentJurisdictionLabel = currentBreadcrumbs.length > 0
+    ? currentBreadcrumbs[currentBreadcrumbs.length - 1].label
+    : 'Overview';
+
   return (
-    <header className={`text-white border-b sticky top-0 z-30 shadow-sm transition-colors duration-300 ${isDark ? 'bg-[#10233D] border-slate-800' : 'bg-white border-slate-200 text-slate-800'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-4">
-        {/* Left: Brand + Calm Status + Inline Jurisdiction Breadcrumb */}
-        <div className="flex items-center space-x-3 sm:space-x-4 min-w-0">
+    <header className={`text-white border-b sticky top-0 z-40 shadow-sm transition-colors duration-300 ${
+      isDark ? 'bg-[#10233D] border-slate-800' : 'bg-white border-slate-200 text-slate-800'
+    }`}>
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 flex items-center justify-between gap-2">
+        {/* Left: Brand + Breadcrumbs Trigger */}
+        <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
           {/* Logo Brandmark */}
-          <div className="flex items-center space-x-2.5 shrink-0">
-            <div className={`w-8 h-8 rounded-lg overflow-hidden border flex items-center justify-center ${isDark ? 'bg-[#10233D] border-white/15' : 'bg-slate-100 border-slate-200'}`}>
+          <div className="flex items-center space-x-2 shrink-0">
+            <div className={`w-8 h-8 rounded-lg overflow-hidden border flex items-center justify-center ${
+              isDark ? 'bg-[#10233D] border-white/15' : 'bg-slate-100 border-slate-200'
+            }`}>
               <img src="/logo.png" alt="UrbanEye" className="w-full h-full object-contain p-0.5" />
             </div>
-            <div className="flex items-center space-x-2">
-              <span className={`font-bold text-base tracking-tight ${isDark ? 'text-white' : 'text-slate-800'}`}>UrbanEye</span>
-              <span className={`hidden sm:inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded ${isDark ? 'text-slate-300 bg-white/5 border border-white/10' : 'text-slate-500 bg-slate-100 border border-slate-200'}`}>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#1E7F73] animate-pulse mr-1.5 inline-block" />
-                Live Edge Inference
+            <div className="flex items-center space-x-1.5">
+              <span className={`font-bold text-sm sm:text-base tracking-tight ${
+                isDark ? 'text-white' : 'text-slate-800'
+              }`}>
+                UrbanEye
+              </span>
+              <span className={`hidden sm:inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded ${
+                isDark ? 'text-slate-300 bg-white/5 border border-white/10' : 'text-slate-500 bg-slate-100 border border-slate-200'
+              }`}>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#1E7F73] animate-pulse mr-1 inline-block" />
+                Live Mesh
               </span>
             </div>
           </div>
 
           <div className={`h-4 w-px hidden md:block shrink-0 ${isDark ? 'bg-slate-700' : 'bg-slate-300'}`} />
 
-          {/* Integrated Jurisdiction Scope Breadcrumb */}
-          <div className={`hidden md:flex items-center space-x-1.5 text-xs min-w-0 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+          {/* Desktop Jurisdiction Scope Breadcrumb */}
+          <div className={`hidden md:flex items-center space-x-1.5 text-xs min-w-0 ${
+            isDark ? 'text-slate-300' : 'text-slate-600'
+          }`}>
             <MapPin className={`w-3.5 h-3.5 shrink-0 ${isDark ? 'text-slate-400' : 'text-slate-400'}`} />
             <div className="flex items-center space-x-1 truncate">
               {currentBreadcrumbs.map((crumb, idx) => (
@@ -63,53 +82,83 @@ export const Header: React.FC<HeaderProps> = ({
                   {crumb.onClick ? (
                     <button
                       onClick={crumb.onClick}
-                      className={`hover:text-[#1E7F73] font-medium transition truncate underline-offset-2 hover:underline ${isDark ? 'text-slate-400' : 'text-slate-500'}`}
+                      className={`hover:text-[#1E7F73] font-medium transition truncate underline-offset-2 hover:underline ${
+                        isDark ? 'text-slate-400' : 'text-slate-500'
+                      }`}
                     >
                       {crumb.label}
                     </button>
                   ) : (
-                    <span className={`font-semibold truncate ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>{crumb.label}</span>
+                    <span className={`font-semibold truncate ${
+                      isDark ? 'text-slate-100' : 'text-slate-800'
+                    }`}>
+                      {crumb.label}
+                    </span>
                   )}
                 </React.Fragment>
               ))}
             </div>
           </div>
+
+          {/* Mobile Truncated Breadcrumb (Tap to Expand Popover) */}
+          <button
+            type="button"
+            onClick={() => setBreadcrumbSheetOpen((prev) => !prev)}
+            className={`md:hidden flex items-center space-x-1 text-[11px] font-medium px-2 py-1.5 rounded-lg border max-w-[130px] sm:max-w-[190px] truncate min-h-[36px] transition ${
+              isDark
+                ? 'bg-slate-800/80 border-slate-700 text-slate-200 hover:bg-slate-700'
+                : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
+            }`}
+            title="Tap to see jurisdiction breadcrumbs"
+            aria-label="Jurisdiction breadcrumb selector"
+          >
+            <MapPin className="w-3 h-3 text-[#1E7F73] shrink-0" />
+            <span className="truncate">{currentJurisdictionLabel}</span>
+            <ChevronRight className="w-2.5 h-2.5 opacity-60 shrink-0" />
+          </button>
         </div>
 
-        {/* Right: Restrained Tools & Actions */}
-        <div className="flex items-center space-x-2.5 shrink-0">
-          {/* Active Bus Sensor Counter */}
-          <div className={`hidden sm:flex items-center space-x-1.5 px-2.5 py-1 rounded text-xs ${isDark ? 'bg-white/5 border border-white/10 text-slate-300' : 'bg-slate-100 border border-slate-200 text-slate-600'}`}>
-            <Radio className="w-3 h-3 text-[#1E7F73] animate-pulse" />
+        {/* Right Side: Actions & Mobile Drawer Toggle */}
+        <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+          {/* Desktop: Active Bus Sensor Counter */}
+          <div className={`hidden sm:flex items-center space-x-1.5 px-2.5 py-1.5 rounded text-xs ${
+            isDark ? 'bg-white/5 border border-white/10 text-slate-300' : 'bg-slate-100 border border-slate-200 text-slate-600'
+          }`}>
+            <Radio className="w-3.5 h-3.5 text-[#1E7F73] animate-pulse" />
             <span className={isDark ? 'text-slate-400' : 'text-slate-500'}>Sensors:</span>
             <span className={`font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>{activeBusCount}</span>
           </div>
 
-          {/* Role Status Pill (Restrained Ink/Slate) */}
-          <div className={`hidden lg:inline-flex items-center px-2.5 py-1 rounded text-xs font-medium ${isDark ? 'bg-white/5 border border-white/10 text-slate-300' : 'bg-slate-100 border border-slate-200 text-slate-600'}`}>
+          {/* Desktop: Role Status Pill */}
+          <div className={`hidden lg:inline-flex items-center px-2.5 py-1.5 rounded text-xs font-medium ${
+            isDark ? 'bg-white/5 border border-white/10 text-slate-300' : 'bg-slate-100 border border-slate-200 text-slate-600'
+          }`}>
             <UserCheck className={`w-3.5 h-3.5 mr-1.5 ${isDark ? 'text-slate-400' : 'text-slate-400'}`} />
             <span>{getRoleLabel(user.role)}</span>
           </div>
 
-          {/* Pair Bus Action Button (Restrained Teal Palette) */}
+          {/* Core Action: Pair Bus (PIN) — Icon button on mobile, with min 44x44px touch target */}
           <button
+            type="button"
             onClick={onOpenPairing}
-            className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-md bg-[#1E7F73] hover:bg-[#186a60] text-white shadow-sm transition"
+            className="flex items-center justify-center space-x-1.5 min-w-[44px] min-h-[44px] px-3 sm:px-3.5 py-2 text-xs font-semibold rounded-lg bg-[#1E7F73] hover:bg-[#186a60] text-white shadow-sm transition active:scale-95"
             title="Pair a bus-mounted phone sensor using 6-digit PIN"
+            aria-label="Pair Bus using 6-digit PIN"
           >
-            <Bus className="w-3.5 h-3.5" />
-            <span>Pair Bus (PIN)</span>
+            <Bus className="w-4 h-4 shrink-0" />
+            <span className="hidden sm:inline">Pair Bus (PIN)</span>
           </button>
 
-          {/* Switch Persona Dropdown */}
+          {/* Desktop: Switch Persona Dropdown */}
           {onSwitchUser && (
-            <div className="relative">
+            <div className="relative hidden md:block">
               <select
                 onChange={(e) => onSwitchUser(e.target.value)}
                 value={user.email}
-                className="text-xs rounded px-2.5 py-1.5 border focus:outline-none focus:ring-1 focus:ring-[#1E7F73] cursor-pointer"
+                className="text-xs rounded-lg px-2.5 py-2 border focus:outline-none focus:ring-1 focus:ring-[#1E7F73] cursor-pointer min-h-[40px]"
                 style={{ backgroundColor: '#1e293b', color: '#e2e8f0', borderColor: '#334155' }}
                 title="Switch test persona"
+                aria-label="Switch test persona"
               >
                 <option value="admin@urbaneye.gov.in" style={{ backgroundColor: '#1e293b', color: '#e2e8f0' }}>National Admin (All India)</option>
                 <option value="admin.pb@urbaneye.gov.in" style={{ backgroundColor: '#1e293b', color: '#e2e8f0' }}>State Admin (Punjab)</option>
@@ -123,35 +172,138 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           )}
 
-          {/* Logout Button */}
+          {/* Desktop: Logout Button */}
           <button
+            type="button"
             onClick={onLogout}
-            className={`p-1.5 rounded transition ${isDark ? 'text-slate-400 hover:text-white hover:bg-white/10' : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'}`}
+            className={`hidden md:flex items-center justify-center min-w-[40px] min-h-[40px] p-2 rounded-lg transition ${
+              isDark ? 'text-slate-400 hover:text-white hover:bg-white/10' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+            }`}
             title="Logout"
+            aria-label="Logout"
           >
             <LogOut className="w-4 h-4" />
+          </button>
+
+          {/* Mobile Hamburger Menu Toggle Button (44x44px minimum touch target) */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            className={`md:hidden flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-lg border transition ${
+              isDark
+                ? 'border-slate-700 bg-slate-800/80 text-slate-200 hover:bg-slate-700'
+                : 'border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100'
+            }`}
+            aria-label="Open mobile navigation menu"
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5 text-red-400" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Jurisdiction Sub-row for small viewports */}
-      <div className={`md:hidden px-4 py-1 border-t text-[11px] flex items-center space-x-1.5 overflow-x-auto ${isDark ? 'bg-slate-900/60 border-white/5 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
-        <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-        <div className="flex items-center space-x-1 whitespace-nowrap">
-          {currentBreadcrumbs.map((crumb, idx) => (
-            <React.Fragment key={idx}>
-              {idx > 0 && <ChevronRight className="w-2.5 h-2.5 text-slate-500 shrink-0" />}
-              {crumb.onClick ? (
-                <button onClick={crumb.onClick} className="text-slate-400 font-medium">
-                  {crumb.label}
-                </button>
-              ) : (
-                <span className="font-semibold text-slate-100">{crumb.label}</span>
-              )}
-            </React.Fragment>
-          ))}
+      {/* Mobile Breadcrumb Expandable Popover */}
+      {breadcrumbSheetOpen && (
+        <div className={`md:hidden px-4 py-2.5 border-t text-xs space-y-1.5 shadow-inner transition-all ${
+          isDark ? 'bg-slate-900 border-slate-700 text-slate-200' : 'bg-slate-100 border-slate-200 text-slate-800'
+        }`}>
+          <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 mb-1">
+            <span className="flex items-center space-x-1">
+              <MapPin className="w-3 h-3 text-[#1E7F73]" />
+              <span>Jurisdiction Hierarchy</span>
+            </span>
+            <button
+              onClick={() => setBreadcrumbSheetOpen(false)}
+              className="text-slate-400 hover:text-white text-[11px] underline"
+            >
+              Close
+            </button>
+          </div>
+          <div className="flex flex-col space-y-1">
+            {currentBreadcrumbs.map((crumb, idx) => (
+              <div key={idx} className="flex items-center space-x-2 py-1">
+                <span className="text-[10px] text-slate-500 font-mono w-4">L{idx + 1}</span>
+                {crumb.onClick ? (
+                  <button
+                    onClick={() => {
+                      crumb.onClick?.();
+                      setBreadcrumbSheetOpen(false);
+                    }}
+                    className="text-[#1E7F73] font-semibold hover:underline text-left"
+                  >
+                    {crumb.label}
+                  </button>
+                ) : (
+                  <span className="font-bold text-white">{crumb.label} (Current)</span>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Mobile Slide-Down Drawer Menu */}
+      {mobileMenuOpen && (
+        <div className={`md:hidden border-t px-4 py-4 space-y-4 shadow-2xl animate-fade-in ${
+          isDark ? 'bg-[#0f1f38] border-slate-700 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
+        }`}>
+          {/* User & Role Information */}
+          <div className={`p-3 rounded-xl border flex items-center justify-between ${
+            isDark ? 'bg-slate-800/80 border-slate-700' : 'bg-slate-50 border-slate-200'
+          }`}>
+            <div>
+              <div className="text-xs font-bold truncate max-w-[200px]">{user.email}</div>
+              <div className="text-[11px] text-[#1E7F73] font-semibold mt-0.5">{getRoleLabel(user.role)}</div>
+            </div>
+            <div className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${
+              isDark ? 'bg-slate-700 text-slate-200' : 'bg-slate-200 text-slate-700'
+            }`}>
+              <Radio className="w-3.5 h-3.5 text-[#1E7F73] animate-pulse" />
+              <span>{activeBusCount} Sensors</span>
+            </div>
+          </div>
+
+          {/* Quick Persona Switcher for Field Review */}
+          {onSwitchUser && (
+            <div>
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                Switch Officer Persona
+              </label>
+              <select
+                onChange={(e) => {
+                  onSwitchUser(e.target.value);
+                  setMobileMenuOpen(false);
+                }}
+                value={user.email}
+                className="w-full text-xs rounded-xl px-3 py-2.5 border focus:outline-none focus:ring-2 focus:ring-[#1E7F73] min-h-[44px] cursor-pointer"
+                style={{ backgroundColor: '#1e293b', color: '#e2e8f0', borderColor: '#334155' }}
+              >
+                <option value="admin@urbaneye.gov.in">National Admin (All India)</option>
+                <option value="admin.pb@urbaneye.gov.in">State Admin (Punjab)</option>
+                <option value="admin.mh@urbaneye.gov.in">State Admin (Maharashtra)</option>
+                <option value="head.kapurthala@urbaneye.gov.in">★ District Head (Kapurthala Demo)</option>
+                <option value="head.jalandhar@urbaneye.gov.in">District Head (Jalandhar)</option>
+                <option value="head.mumbai@urbaneye.gov.in">District Head (Mumbai Suburban)</option>
+                <option value="head.pune@urbaneye.gov.in">District Head (Pune)</option>
+                <option value="head.bengaluru@urbaneye.gov.in">District Head (Bengaluru)</option>
+              </select>
+            </div>
+          )}
+
+          {/* Logout Button (Full-width, 44px height) */}
+          <button
+            type="button"
+            onClick={() => {
+              setMobileMenuOpen(false);
+              onLogout();
+            }}
+            className="w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold text-xs min-h-[44px] transition"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Sign Out of UrbanEye</span>
+          </button>
+        </div>
+      )}
     </header>
   );
 };

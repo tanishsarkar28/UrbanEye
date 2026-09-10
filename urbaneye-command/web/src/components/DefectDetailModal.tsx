@@ -121,17 +121,17 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({
     : null;
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
-        {/* Header */}
-        <div className="px-5 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+    <div className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/70 backdrop-blur-sm animate-fade-in">
+      <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden flex flex-col max-h-[94dvh] sm:max-h-[90vh]">
+        {/* Sticky Header */}
+        <div className="px-4 sm:px-5 py-3.5 sm:py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-2.5">
-            <div className="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-red-100 text-red-600 flex items-center justify-center shrink-0">
               <ShieldAlert className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h3 className="text-base font-bold text-slate-900 tracking-tight">
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
                   {event.type.replace('_', ' ')}
                 </h3>
                 {getStatusBadge(event.status)}
@@ -141,16 +141,17 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-200 transition"
+            className="text-slate-400 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-200 transition min-w-[44px] min-h-[44px] flex items-center justify-center"
+            aria-label="Close detail modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Scrollable Content */}
-        <div className="p-5 overflow-y-auto space-y-4">
+        <div className="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1">
           {/* Image Snippet Preview */}
-          <div className="relative rounded-lg overflow-hidden border border-slate-200 bg-slate-900 aspect-video flex items-center justify-center">
+          <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-900 aspect-video flex items-center justify-center">
             {imageSrc ? (
               <img
                 src={imageSrc}
@@ -170,16 +171,16 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({
           </div>
 
           {/* Telemetry & Metadata Grid */}
-          <div className="grid grid-cols-2 gap-3 text-xs">
-            <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3 text-xs">
+            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
               <span className="text-slate-500 font-medium flex items-center space-x-1.5 mb-1">
                 <Bus className="w-3.5 h-3.5 text-blue-600" />
-                <span>Reporting Bus Sensor</span>
+                <span>Reporting Bus</span>
               </span>
               <span className="font-bold text-slate-900 text-sm">{event.busLabel}</span>
             </div>
 
-            <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
               <span className="text-slate-500 font-medium flex items-center space-x-1.5 mb-1">
                 <Clock className="w-3.5 h-3.5 text-indigo-600" />
                 <span>Detected At</span>
@@ -192,7 +193,7 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({
               </span>
             </div>
 
-            <div className="col-span-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <div className="col-span-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
               <span className="text-slate-500 font-medium flex items-center justify-between mb-1">
                 <span className="flex items-center space-x-1.5">
                   <MapPin className="w-3.5 h-3.5 text-red-600" />
@@ -202,10 +203,10 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({
                   href={`https://www.google.com/maps/search/?api=1&query=${event.latitude},${event.longitude}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 text-[11px] font-semibold flex items-center space-x-0.5"
+                  className="text-blue-600 hover:text-blue-800 text-[11px] font-semibold flex items-center space-x-0.5 p-1 min-h-[36px]"
                 >
                   <span>Open Map</span>
-                  <ExternalLink className="w-2.5 h-2.5" />
+                  <ExternalLink className="w-3 h-3 ml-0.5" />
                 </a>
               </span>
               <span className="font-mono font-bold text-slate-800 text-xs">
@@ -231,14 +232,14 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="e.g. WO-PB-2026-402: Dispatched Phagwara PWD Highway Maintenance Sub-division."
                 rows={2}
-                className="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className="w-full text-base sm:text-xs p-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               />
             </div>
           )}
 
           {/* Feedback messages */}
           {actionError && (
-            <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs flex items-start space-x-2">
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-start space-x-2">
               <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
               <div>
                 <strong className="block font-semibold">Action Failed</strong>
@@ -248,19 +249,19 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({
           )}
 
           {actionSuccess && (
-            <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center space-x-2">
+            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center space-x-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
               <span className="font-semibold">{actionSuccess}</span>
             </div>
           )}
         </div>
 
-        {/* Footer Actions */}
-        <div className="px-5 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-2">
+        {/* Sticky Footer Actions with Safe Area Inset Support */}
+        <div className="px-4 sm:px-5 py-3.5 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 shrink-0 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-3.5">
           <div className="flex items-center space-x-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 transition"
+              className="px-4 py-2.5 text-xs font-semibold rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 transition min-h-[44px]"
             >
               Close
             </button>
@@ -268,11 +269,11 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({
               <button
                 onClick={handleDelete}
                 disabled={submitting || deleting}
-                className="px-3 py-2 text-xs font-semibold rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 transition flex items-center space-x-1.5 disabled:opacity-50"
-                title="Remove this test detection event from the register"
+                className="px-3 py-2.5 text-xs font-semibold rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 transition flex items-center space-x-1.5 disabled:opacity-50 min-h-[44px]"
+                title="Remove this test detection event"
               >
                 <Trash2 className={`w-3.5 h-3.5 ${deleting ? 'animate-spin' : ''}`} />
-                <span>Delete Record</span>
+                <span>Delete</span>
               </button>
             )}
           </div>
@@ -283,10 +284,10 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({
                 <button
                   onClick={() => handleAction('ASSIGNED_FOR_REPAIR')}
                   disabled={submitting}
-                  className="px-3.5 py-2 text-xs font-bold rounded-lg bg-orange-600 hover:bg-orange-700 text-white shadow-sm transition flex items-center space-x-1.5 disabled:opacity-50"
+                  className="px-4 py-2.5 text-xs font-bold rounded-xl bg-orange-600 hover:bg-orange-700 text-white shadow-sm transition flex items-center space-x-1.5 disabled:opacity-50 min-h-[44px]"
                 >
                   <Wrench className={`w-3.5 h-3.5 ${submitting && activeAction === 'ASSIGNED_FOR_REPAIR' ? 'animate-spin' : ''}`} />
-                  <span>Assign for Repair</span>
+                  <span>Assign Work Order</span>
                 </button>
               )}
 
@@ -294,7 +295,7 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({
                 <button
                   onClick={() => handleAction('RESOLVED')}
                   disabled={submitting}
-                  className="px-3.5 py-2 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition flex items-center space-x-1.5 disabled:opacity-50"
+                  className="px-4 py-2.5 text-xs font-bold rounded-xl bg-[#1E7F73] hover:bg-[#186a60] text-white shadow-sm transition flex items-center space-x-1.5 disabled:opacity-50 min-h-[44px]"
                 >
                   <CheckCircle2 className={`w-3.5 h-3.5 ${submitting && activeAction === 'RESOLVED' ? 'animate-spin' : ''}`} />
                   <span>Mark Resolved</span>
@@ -305,9 +306,9 @@ export const DefectDetailModal: React.FC<DefectDetailModalProps> = ({
                 <button
                   onClick={() => handleAction('NEW')}
                   disabled={submitting}
-                  className="px-3 py-2 text-xs font-bold rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 transition"
+                  className="px-4 py-2.5 text-xs font-bold rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 transition min-h-[44px]"
                 >
-                  Re-open Defect
+                  Re-open
                 </button>
               )}
             </div>

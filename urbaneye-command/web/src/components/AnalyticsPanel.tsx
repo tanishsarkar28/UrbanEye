@@ -60,10 +60,10 @@ export const AnalyticsPanel: React.FC<AnalyticsPanelProps> = ({ stats, districtN
   const health = getHealthMeta(stats.roadHealthScore);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 mb-5">
-      {/* 1. HERO KPI: Road Health Index */}
-      <div className={`lg:col-span-5 rounded-xl border p-5 shadow-sm flex flex-col justify-between relative overflow-hidden transition-colors duration-300 ${cardBase}`}>
-        <div className="flex items-start justify-between">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 mb-4 sm:mb-5">
+      {/* 1. HERO KPI: Road Health Index (Full width on mobile, 5 cols on lg+) */}
+      <div className={`lg:col-span-5 rounded-xl border p-4 sm:p-5 shadow-sm flex flex-col justify-between relative overflow-hidden transition-colors duration-300 ${cardBase}`}>
+        <div className="flex items-start justify-between gap-2">
           <div>
             <div className={`flex items-center space-x-1.5 text-xs font-semibold uppercase tracking-wider ${labelClr}`}>
               <Activity className={`w-3.5 h-3.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`} />
@@ -73,7 +73,7 @@ export const AnalyticsPanel: React.FC<AnalyticsPanelProps> = ({ stats, districtN
               Primary jurisdiction condition metric
             </p>
           </div>
-          <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded border ${health.badgeBg}`}>
+          <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded border shrink-0 ${health.badgeBg}`}>
             {health.label}
           </span>
         </div>
@@ -86,7 +86,7 @@ export const AnalyticsPanel: React.FC<AnalyticsPanelProps> = ({ stats, districtN
           <span className={`text-sm font-bold ${hintClr}`}>/ 100</span>
         </div>
 
-        {/* Progress Bar */}
+        {/* Progress Bar & Summary */}
         <div>
           <div className={`w-full h-2 rounded-full overflow-hidden mb-2 ${trackClr}`}>
             <div
@@ -95,74 +95,88 @@ export const AnalyticsPanel: React.FC<AnalyticsPanelProps> = ({ stats, districtN
             />
           </div>
           <div className={`flex items-center justify-between text-[11px] font-medium ${hintClr}`}>
-            <span>{health.summary}</span>
-            <span className={`font-semibold ${targetClr}`}>Target: 80+</span>
+            <span className="truncate mr-2">{health.summary}</span>
+            <span className={`font-semibold shrink-0 ${targetClr}`}>Target: 80+</span>
           </div>
         </div>
       </div>
 
-      {/* 2. SECONDARY METRICS */}
-      <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3">
+      {/* 2. SECONDARY METRICS: 1-column stack on mobile (< md), 2-column grid on tablet (md), 4-column on desktop (lg+) */}
+      <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Metric A: New Defects */}
-        <div className={`rounded-xl border p-3.5 shadow-sm flex flex-col justify-between transition-colors duration-300 ${isDark ? 'bg-slate-800 border-red-900/60' : 'bg-white border-red-200'}`}>
-          <div className={`flex items-center justify-between text-xs font-semibold ${labelClr}`}>
-            <span>New Defects</span>
-            <AlertCircle className="w-4 h-4 text-red-500" />
+        <div className={`rounded-xl border p-3.5 shadow-sm flex sm:flex-col justify-between sm:justify-between items-center sm:items-stretch transition-colors duration-300 ${
+          isDark ? 'bg-slate-800 border-red-900/60' : 'bg-white border-red-200'
+        }`}>
+          <div>
+            <div className={`flex items-center justify-between text-xs font-semibold ${labelClr}`}>
+              <span>New Defects</span>
+              <AlertCircle className="w-4 h-4 text-red-500 hidden sm:block" />
+            </div>
+            <div className="my-1 sm:my-1.5">
+              <span className="text-2xl font-black text-red-500">
+                {stats.byStatus.new}
+              </span>
+            </div>
+            <div className={`text-[10px] ${hintClr}`}>Pending review</div>
           </div>
-          <div className="my-1.5">
-            <span className="text-2xl font-black text-red-500">
-              {stats.byStatus.new}
-            </span>
-          </div>
-          <div className={`text-[10px] ${hintClr}`}>Pending review</div>
+          <AlertCircle className="w-6 h-6 text-red-500 sm:hidden shrink-0" />
         </div>
 
         {/* Metric B: Assigned */}
-        <div className={`rounded-xl border p-3.5 shadow-sm flex flex-col justify-between transition-colors duration-300 ${cardBase}`}>
-          <div className={`flex items-center justify-between text-xs font-semibold ${labelClr}`}>
-            <span>Assigned</span>
-            <Wrench className={`w-4 h-4 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
+        <div className={`rounded-xl border p-3.5 shadow-sm flex sm:flex-col justify-between sm:justify-between items-center sm:items-stretch transition-colors duration-300 ${cardBase}`}>
+          <div>
+            <div className={`flex items-center justify-between text-xs font-semibold ${labelClr}`}>
+              <span>Assigned</span>
+              <Wrench className={`w-4 h-4 ${isDark ? 'text-slate-400' : 'text-slate-500'} hidden sm:block`} />
+            </div>
+            <div className="my-1 sm:my-1.5">
+              <span className={`text-2xl font-black ${numClr}`}>
+                {stats.byStatus.assigned}
+              </span>
+            </div>
+            <div className={`text-[10px] ${hintClr}`}>Work orders open</div>
           </div>
-          <div className="my-1.5">
-            <span className={`text-2xl font-black ${numClr}`}>
-              {stats.byStatus.assigned}
-            </span>
-          </div>
-          <div className={`text-[10px] ${hintClr}`}>Work orders open</div>
+          <Wrench className={`w-6 h-6 ${isDark ? 'text-slate-400' : 'text-slate-500'} sm:hidden shrink-0`} />
         </div>
 
         {/* Metric C: Resolved */}
-        <div className={`rounded-xl border p-3.5 shadow-sm flex flex-col justify-between transition-colors duration-300 ${cardBase}`}>
-          <div className={`flex items-center justify-between text-xs font-semibold ${labelClr}`}>
-            <span>Resolved</span>
-            <CheckCircle2 className="w-4 h-4 text-[#1E7F73]" />
+        <div className={`rounded-xl border p-3.5 shadow-sm flex sm:flex-col justify-between sm:justify-between items-center sm:items-stretch transition-colors duration-300 ${cardBase}`}>
+          <div>
+            <div className={`flex items-center justify-between text-xs font-semibold ${labelClr}`}>
+              <span>Resolved</span>
+              <CheckCircle2 className="w-4 h-4 text-[#1E7F73] hidden sm:block" />
+            </div>
+            <div className="my-1 sm:my-1.5">
+              <span className={`text-2xl font-black ${numClr}`}>
+                {stats.byStatus.resolved}
+              </span>
+            </div>
+            <div className={`text-[10px] ${hintClr}`}>Repaired &amp; verified</div>
           </div>
-          <div className="my-1.5">
-            <span className={`text-2xl font-black ${numClr}`}>
-              {stats.byStatus.resolved}
-            </span>
-          </div>
-          <div className={`text-[10px] ${hintClr}`}>Repaired &amp; verified</div>
+          <CheckCircle2 className="w-6 h-6 text-[#1E7F73] sm:hidden shrink-0" />
         </div>
 
         {/* Metric D: Bus Sensors */}
-        <div className={`rounded-xl border p-3.5 shadow-sm flex flex-col justify-between transition-colors duration-300 ${cardBase}`}>
-          <div className={`flex items-center justify-between text-xs font-semibold ${labelClr}`}>
-            <span>Bus Sensors</span>
-            <Bus className={`w-4 h-4 ${isDark ? 'text-slate-300' : 'text-slate-700'}`} />
+        <div className={`rounded-xl border p-3.5 shadow-sm flex sm:flex-col justify-between sm:justify-between items-center sm:items-stretch transition-colors duration-300 ${cardBase}`}>
+          <div>
+            <div className={`flex items-center justify-between text-xs font-semibold ${labelClr}`}>
+              <span>Bus Sensors</span>
+              <Bus className={`w-4 h-4 ${isDark ? 'text-slate-300' : 'text-slate-700'} hidden sm:block`} />
+            </div>
+            <div className="my-1 sm:my-1.5 flex items-baseline space-x-1.5">
+              <span className={`text-2xl font-black ${numClr}`}>
+                {stats.activeBusesCount}
+              </span>
+              <span className="text-[10px] text-[#1E7F73] font-semibold flex items-center">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#1E7F73] mr-1 animate-pulse" />
+                Live
+              </span>
+            </div>
+            <div className={`text-[10px] truncate ${hintClr}`}>
+              {districtName || 'District'} fleet
+            </div>
           </div>
-          <div className="my-1.5 flex items-baseline space-x-1.5">
-            <span className={`text-2xl font-black ${numClr}`}>
-              {stats.activeBusesCount}
-            </span>
-            <span className="text-[10px] text-[#1E7F73] font-semibold flex items-center">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#1E7F73] mr-1 animate-pulse" />
-              Live
-            </span>
-          </div>
-          <div className={`text-[10px] truncate ${hintClr}`}>
-            {districtName || 'District'} fleet
-          </div>
+          <Bus className={`w-6 h-6 ${isDark ? 'text-slate-300' : 'text-slate-700'} sm:hidden shrink-0`} />
         </div>
       </div>
     </div>

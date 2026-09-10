@@ -29,7 +29,7 @@ export default function Features({ theme = 'dark' }: FeaturesProps) {
   return (
     <section
       id="features"
-      className={`border-b px-6 py-28 md:px-12 transition-colors duration-300 ${
+      className={`border-b px-4 sm:px-6 py-14 sm:py-20 md:py-28 md:px-12 transition-colors duration-300 ${
         isDark ? 'bg-[#0b1b36] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
       }`}
     >
@@ -39,7 +39,7 @@ export default function Features({ theme = 'dark' }: FeaturesProps) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.6 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className={`font-display mb-16 max-w-xl text-3xl font-bold leading-tight md:text-4xl ${
+          className={`font-display mb-8 sm:mb-12 md:mb-16 max-w-xl text-3xl font-bold leading-tight md:text-4xl ${
             isDark ? 'text-white' : 'text-slate-900'
           }`}
         >

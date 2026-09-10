@@ -38,7 +38,7 @@ export default function HowItWorks({ theme = 'dark' }: HowItWorksProps) {
   return (
     <section
       id="how-it-works"
-      className={`border-b px-6 py-28 md:px-12 transition-colors duration-300 ${
+      className={`border-b px-4 sm:px-6 py-14 sm:py-20 md:py-28 md:px-12 transition-colors duration-300 ${
         isDark ? 'bg-[#081325] border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
       }`}
     >

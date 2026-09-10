@@ -35,7 +35,7 @@ export default function Impact({ theme = 'dark' }: ImpactProps) {
   return (
     <section
       id="impact"
-      className={`border-b px-6 py-28 md:px-12 transition-colors duration-300 ${
+      className={`border-b px-4 sm:px-6 py-14 sm:py-20 md:py-28 md:px-12 transition-colors duration-300 ${
         isDark ? 'bg-[#0b1b36] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
       }`}
     >
