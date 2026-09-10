@@ -167,9 +167,7 @@ If you are a newly initialized AI agent picking up this project, read this secti
 
 ---
 
-## 4. Current Git Status (Unpushed Local Changes)
-
-The following files have been modified and tested locally, waiting for the user's explicit signal before running `git push`:
+## 3. Architecture & File Structure
 
 ```
 UrbanEye + App/
@@ -201,15 +199,15 @@ UrbanEye + App/
             │   ├── LandingPage.tsx   <-- Theme-aware Landing Page
             │   └── Login.tsx         <-- Test Personas & Credential Login
             └── components/
-                ├── Header.tsx        <-- Calm Single-Chrome Header
-                ├── NationalOverviewView.tsx <-- Part 1: India Health Map & Ranked Table  
-                ├── StateOverviewView.tsx    <-- State District Rollup View
-                ├── AnalyticsPanel.tsx       <-- Part 2: Hero Road Health Index Card
-                ├── LiveMap.tsx              <-- Central Leaflet Defect Map + Frosted Legend
-                ├── DefectTable.tsx          <-- Defect Management Register
-                ├── PairingModal.tsx         <-- 6-Digit Bus PIN Pairing Dialog
-                ├── DefectDetailModal.tsx    <-- Telemetry & Officer Action Modal
-                └── landing/                 <-- Theme-Adaptive Landing Sections
+                ├── Header.tsx        <-- Mobile-first Collapsible Header & Drawer
+                ├── NationalOverviewView.tsx <-- Part 1: India Health Map, Segmented Tabs & Cards  
+                ├── StateOverviewView.tsx    <-- State District Rollup View & Segmented Switcher
+                ├── AnalyticsPanel.tsx       <-- Part 2: Hero Road Health Index & 1-Col Mobile KPI Stack
+                ├── LiveMap.tsx              <-- Leaflet Defect Map + Collapsible Frosted Legend Tab
+                ├── DefectTable.tsx          <-- Dual-mode Defect Register (Cards on mobile, Table on desktop)
+                ├── PairingModal.tsx         <-- 6-Digit Bus PIN Pairing Mobile Bottom Sheet
+                ├── DefectDetailModal.tsx    <-- Telemetry & Officer Action Mobile Bottom Sheet
+                └── landing/                 <-- Theme-Adaptive & Fluid Landing Sections
                     ├── Hero.tsx
                     ├── Problem.tsx
                     ├── HowItWorks.tsx
@@ -221,27 +219,37 @@ UrbanEye + App/
 
 ---
 
-## 4. Current Git Status (Unpushed Local Changes)
+## 4. Current Git Status (Local Commits Pending User Signal for Push)
 
-The following files have been modified and tested locally, waiting for the user's explicit signal before running `git push`:
+> **STANDING RULE**: Never execute `git push` without explicit user permission.
 
+The working directory is clean. All changes have been built and tested with `npm run build` (0 errors) and committed locally across the following local commits on branch `main`:
+
+- **Commit `1545750`**: `feat: complete mobile-first and cross-device responsive overhaul`
+- **Commit `6f856ca`**: `docs: document Request 12 mobile overhaul in handoff`
+
+Files included in the overhaul:
 ```
+modified:   urbaneye-command/web/index.html
+modified:   urbaneye-command/web/src/index.css
 modified:   urbaneye-command/web/src/App.tsx
-modified:   urbaneye-command/web/src/components/AnalyticsPanel.tsx
-modified:   urbaneye-command/web/src/components/DefectTable.tsx
+modified:   urbaneye-command/web/src/pages/Login.tsx
 modified:   urbaneye-command/web/src/components/Header.tsx
-modified:   urbaneye-command/web/src/components/LiveMap.tsx
 modified:   urbaneye-command/web/src/components/NationalOverviewView.tsx
 modified:   urbaneye-command/web/src/components/StateOverviewView.tsx
-modified:   urbaneye-command/web/src/components/landing/Features.tsx
-modified:   urbaneye-command/web/src/components/landing/Footer.tsx
+modified:   urbaneye-command/web/src/components/AnalyticsPanel.tsx
+modified:   urbaneye-command/web/src/components/LiveMap.tsx
+modified:   urbaneye-command/web/src/components/DefectTable.tsx
+modified:   urbaneye-command/web/src/components/PairingModal.tsx
+modified:   urbaneye-command/web/src/components/DefectDetailModal.tsx
 modified:   urbaneye-command/web/src/components/landing/Hero.tsx
-modified:   urbaneye-command/web/src/components/landing/HowItWorks.tsx
-modified:   urbaneye-command/web/src/components/landing/Impact.tsx
-modified:   urbaneye-command/web/src/components/landing/MapPreview.tsx
 modified:   urbaneye-command/web/src/components/landing/Problem.tsx
-modified:   urbaneye-command/web/src/pages/LandingPage.tsx
-modified:   urbaneye-command/web/tailwind.config.js
+modified:   urbaneye-command/web/src/components/landing/HowItWorks.tsx
+modified:   urbaneye-command/web/src/components/landing/Features.tsx
+modified:   urbaneye-command/web/src/components/landing/MapPreview.tsx
+modified:   urbaneye-command/web/src/components/landing/Impact.tsx
+modified:   urbaneye-command/web/src/components/landing/Footer.tsx
+modified:   PROJECT_CONTEXT_AND_HANDOFF.md
 ```
 
 ---
