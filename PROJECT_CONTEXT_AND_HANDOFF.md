@@ -123,9 +123,53 @@ If you are a newly initialized AI agent picking up this project, read this secti
   - Added `darkMode: 'class'`, `slate: "#5B6B7A"`, and `amber: "#D98E04"` into `urbaneye-command/web/tailwind.config.js`.
   - Built cleanly with `npm run build` (0 errors).
 
+### Request 12: Mobile-First Cross-Device Ergonomics & Responsive Overhaul
+- **User Prompt**:
+  *Make the entire web dashboard (landing page + login + National Overview + State Overview + District Command page) genuinely comfortable to use on phone, tablet, laptop, and large desktop — not just "doesn't overflow," but actually pleasant to operate one-handed on a phone.*
+- **Actions Taken**:
+  - **Core Viewport & Safe-Area Inset Support**:
+    - Added `viewport-fit=cover` in `index.html`.
+    - Added CSS variables `--sat`, `--sab`, `--sal`, `--sar` with utility classes `.pt-safe`, `.pb-safe` in `index.css`.
+    - Disabled webkit tap highlight and enabled touch-action ergonomics.
+  - **1. Header.tsx**:
+    - Mobile collapsed app bar with truncated jurisdiction chip and tap-to-expand popover.
+    - Kept "+ Pair Bus" primary action visible as a 44x44px icon button.
+    - Hamburger button opens a smooth slide-down drawer with role status, live sensor pill, touch-friendly persona switcher, and full-width sign-out button.
+  - **2. NationalOverviewView.tsx**:
+    - Mobile Segmented View Switcher: `[ 🗺️ India Health Map | 📋 State Rankings (N) ]`.
+    - Stacked state cards on mobile with health gauge bars and 2x2 key metrics grid.
+    - Slide-up "Sort & Filter" bottom sheet modal with 44px tap targets.
+    - `map.invalidateSize()` listeners for tab switches and orientation changes.
+  - **3. StateOverviewView.tsx**:
+    - Mobile Segmented View Switcher: `[ 🏛️ Districts (N) | 🗺️ Regional Map ]`.
+    - Single-column district cards on mobile with 44px buttons, 2-col on tablet, 3-col on desktop.
+  - **4. AnalyticsPanel.tsx**:
+    - Hero Road Health Index card at full width.
+    - Secondary KPI cards stack in a clean 1-column layout on mobile (< 768px), 2-col on tablet (`md:`), and 4-col on desktop (`lg:`+).
+  - **5. LiveMap.tsx**:
+    - Full-bleed map canvas.
+    - Frosted glass legend collapses into a corner floating pill tab (`Legend ∧`), tap to expand.
+    - Leaflet zoom controls repositioned to `bottomright` for one-handed thumb ergonomics.
+    - Added window resize & `ResizeObserver` calling `map.invalidateSize()`.
+  - **6. DefectTable.tsx**:
+    - Dual layout: card-per-defect stack on mobile with thumbnail, type, status, telemetry, and 44px action buttons; full data table on `md:` and above.
+  - **7. PairingModal.tsx & DefectDetailModal.tsx**:
+    - Converted into mobile bottom sheets sliding up from the bottom with `max-h-[94dvh]`.
+    - Input font sizes $\ge 16$px (`text-base`) to prevent iOS Safari auto-zoom.
+    - Safe-area bottom padding for iOS home indicator and Android gesture pill.
+  - **8. Landing Page Sections**:
+    - Scaled hero typography `text-3xl sm:text-5xl md:text-6xl lg:text-7xl`.
+    - Reduced excessive vertical padding from `py-28` to `py-14 sm:py-20 md:py-28`.
+    - Lightweight SVG patterns for low-end mobile GPUs.
+  - **9. Login.tsx**:
+    - Form inputs $\ge 16$px font size, 44px minimum touch targets for all test persona buttons and actions.
+  - Built cleanly with `npm run build` (0 errors).
+
 ---
 
-## 3. Architecture & File Structure
+## 4. Current Git Status (Unpushed Local Changes)
+
+The following files have been modified and tested locally, waiting for the user's explicit signal before running `git push`:
 
 ```
 UrbanEye + App/
@@ -158,7 +202,7 @@ UrbanEye + App/
             │   └── Login.tsx         <-- Test Personas & Credential Login
             └── components/
                 ├── Header.tsx        <-- Calm Single-Chrome Header
-                ├── NationalOverviewView.tsx <-- Part 1: India Health Map & Ranked Table
+                ├── NationalOverviewView.tsx <-- Part 1: India Health Map & Ranked Table  
                 ├── StateOverviewView.tsx    <-- State District Rollup View
                 ├── AnalyticsPanel.tsx       <-- Part 2: Hero Road Health Index Card
                 ├── LiveMap.tsx              <-- Central Leaflet Defect Map + Frosted Legend
