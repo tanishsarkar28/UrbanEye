@@ -322,6 +322,30 @@ For testing different roles and routing behaviors:
 
 ---
 
+### Request 15: Fix Pothole Detection & Show Diameter/Cost on Phone Screen + Dashboard
+- **User Prompt**: `the app is not detecting the potholes and also not showing the diameter on the phone screen. also i want the diameter size to show on each pot hole on dashboard with the price to fix it`
+- **Root Cause Found**:
+  1. `TemporalDetectionTracker.kt` was silently **dropping** `estimatedDiameterCm` and `estimatedRepairCost` from `DetectionResult` when creating confirmed tracked detections (both in `processFrame()` and `getActivePersistentDetections()`). The diameter was computed in the ONNX detector but lost in the tracker.
+  2. `OnnxRoadDefectDetector.kt` had `numAnchors = 2100` hardcoded — this was made **dynamic** from actual model output shape so it works with any YOLOv8 variant.
+  3. Confidence threshold was lowered from `0.25f` to `0.15f` for better real-world road sensitivity.
+- **Actions Taken**:
+  - **`TemporalDetectionTracker.kt`**: Added `estimatedDiameterCm` and `estimatedRepairCost` to the `TrackedDefect` data class. Propagated from input candidates when initializing new tracks, updated during track matching, and included in all emitted `DetectionResult` objects.
+  - **`OnnxRoadDefectDetector.kt`**: Made `numAnchors` dynamic (`totalElements / (4 + numClasses)`). Lowered `targetConfidenceThreshold` from 0.25 → 0.15.
+  - **`activity_main.xml`**: Added:
+    - `tvDetectionStatus` — Line 3 in HUD bar showing live detection type, confidence, diameter, cost
+    - `detectionBanner` — Full-width orange alert banner at bottom of screen showing `🚧 POTHOLE XX%  Ø XX cm  Fix: ₹X,XXX` when a pothole is detected
+  - **`MainActivity.kt`**: Wired up `tvDetectionStatus` and `detectionBanner` visibility logic in the real-time `runOnUiThread` block.
+  - **Dashboard**: Already implemented in previous session via `DefectTable.tsx` and `getPotholeCostDetails()` utility — both mobile cards and desktop table rows show `Ø XX cm` and `Fix: ₹X,XXX`.
+- **Build**: `assembleDebug` — BUILD SUCCESSFUL in 20s, APK copied to project root.
+- **Commit**: `fix(mobile): fix pothole detection - preserve diameter/cost in tracker, add live detection banner, lower confidence threshold to 0.15`
+- **Pushed**: Yes (to `https://github.com/tanishsarkar28/UrbanEye.git` main)
+
+### Request 16: Push
+- **Pushed to GitHub**: Yes — commit `25c7b63` pushed to `main`.
+- **Note**: GitHub warned about APK file size (90.86 MB > 50 MB recommended). APK still pushed successfully.
+
+---
+
 ## 7. Detection Category Registry (Reference)
 
 All detection colors and priorities are defined in:
