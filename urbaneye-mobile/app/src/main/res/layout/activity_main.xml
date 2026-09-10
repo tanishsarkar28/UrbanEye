@@ -121,6 +121,18 @@
                 android:textSize="11sp"
                 android:textStyle="bold" />
         </LinearLayout>
+
+        <!-- Line 3: Live Detection Status -->
+        <TextView
+            android:id="@+id/tvDetectionStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="🟢 AI Scanning road surface..."
+            android:textColor="#64748B"
+            android:textSize="10sp"
+            android:singleLine="true"
+            android:ellipsize="end" />
     </LinearLayout>
 
     <!-- 4. PIN Pairing Overlay Screen (Shown when unpaired) -->
@@ -286,7 +298,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="24dp"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/detectionBanner"
         app:layout_constraintEnd_toEndOf="parent">
 
         <Button
@@ -307,6 +319,51 @@
             android:text="⚡ Test Pothole"
             android:textColor="@color/white"
             android:textSize="11sp" />
+    </LinearLayout>
+
+    <!-- Live Detection Alert Banner (bottom of screen) -->
+    <LinearLayout
+        android:id="@+id/detectionBanner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#F0F97316"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="10dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/tvDetectionBannerType"
+            android:text="🚧 POTHOLE DETECTED"
+            android:textColor="@color/black"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvDetectionBannerSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ø 45 cm"
+            android:textColor="@color/black"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:layout_marginEnd="12dp" />
+
+        <TextView
+            android:id="@+id/tvDetectionBannerCost"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fix: ₹1,850"
+            android:textColor="@color/black"
+            android:textSize="13sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -30,6 +30,8 @@ class TemporalDetectionTracker(
         var lastSeenFrame: Long,
         var maxConfidence: Float,
         var bestSnippetBase64: String?,
+        var estimatedDiameterCm: Int? = null,
+        var estimatedRepairCost: Int? = null,
         var hasDispatchedEvent: Boolean = false
     )
 
@@ -79,19 +81,28 @@ class TemporalDetectionTracker(
                 if (bestCandidate.croppedSnippetBase64 != null) {
                     track.bestSnippetBase64 = bestCandidate.croppedSnippetBase64
                 }
+                // Preserve diameter and cost from best candidate
+                if (bestCandidate.estimatedDiameterCm != null) {
+                    track.estimatedDiameterCm = bestCandidate.estimatedDiameterCm
+                }
+                if (bestCandidate.estimatedRepairCost != null) {
+                    track.estimatedRepairCost = bestCandidate.estimatedRepairCost
+                }
                 unmatchedCandidates.remove(bestCandidate)
 
                 // Check promotion threshold: 3 hits across sliding window and not yet dispatched
                 if (track.hits >= requiredHits && !track.hasDispatchedEvent) {
                     track.hasDispatchedEvent = true
-                    Log.i(tag, "✅ Confirmed temporally consistent defect: ${track.type} (Hits: ${track.hits}, Conf: ${track.maxConfidence})")
+                    Log.i(tag, "✅ Confirmed temporally consistent defect: ${track.type} (Hits: ${track.hits}, Conf: ${track.maxConfidence}, Ø ${track.estimatedDiameterCm} cm, ₹${track.estimatedRepairCost})")
 
                     confirmedEvents.add(
                         DetectionResult(
                             type = track.type,
                             confidence = track.maxConfidence,
                             boundingBox = track.boundingBox,
-                            croppedSnippetBase64 = track.bestSnippetBase64
+                            croppedSnippetBase64 = track.bestSnippetBase64,
+                            estimatedDiameterCm = track.estimatedDiameterCm,
+                            estimatedRepairCost = track.estimatedRepairCost
                         )
                     )
                 }
@@ -108,7 +119,9 @@ class TemporalDetectionTracker(
                     hits = 1,
                     lastSeenFrame = currentFrameIndex,
                     maxConfidence = cand.confidence,
-                    bestSnippetBase64 = cand.croppedSnippetBase64
+                    bestSnippetBase64 = cand.croppedSnippetBase64,
+                    estimatedDiameterCm = cand.estimatedDiameterCm,
+                    estimatedRepairCost = cand.estimatedRepairCost
                 )
             )
         }
@@ -133,7 +146,9 @@ class TemporalDetectionTracker(
                     type = it.type,
                     confidence = it.maxConfidence,
                     boundingBox = it.boundingBox,
-                    croppedSnippetBase64 = it.bestSnippetBase64
+                    croppedSnippetBase64 = it.bestSnippetBase64,
+                    estimatedDiameterCm = it.estimatedDiameterCm,
+                    estimatedRepairCost = it.estimatedRepairCost
                 )
             }
     }

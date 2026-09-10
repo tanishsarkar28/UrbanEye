@@ -248,6 +248,30 @@ class MainActivity : AppCompatActivity() {
                 val displayDetections = if (rawDetections.isNotEmpty()) rawDetections else persistentDetections
                 binding.overlayView.setDetections(displayDetections)
 
+                // Update detection status HUD line
+                if (displayDetections.isNotEmpty()) {
+                    val top = displayDetections.first()
+                    val typeLabel = top.type.replace("_", " ")
+                    val diamStr = if (top.estimatedDiameterCm != null) " • Ø${top.estimatedDiameterCm}cm" else ""
+                    val costStr = if (top.estimatedRepairCost != null) " • ₹${top.estimatedRepairCost}" else ""
+                    binding.tvDetectionStatus.text = "🚧 $typeLabel ${(top.confidence * 100).toInt()}%$diamStr$costStr"
+                    binding.tvDetectionStatus.setTextColor(android.graphics.Color.parseColor("#f97316"))
+
+                    // Show bottom detection banner for potholes
+                    if (top.type == "POTHOLE" && top.estimatedDiameterCm != null) {
+                        binding.detectionBanner.visibility = android.view.View.VISIBLE
+                        binding.tvDetectionBannerType.text = "🚧 POTHOLE ${(top.confidence * 100).toInt()}%"
+                        binding.tvDetectionBannerSize.text = "Ø ${top.estimatedDiameterCm} cm"
+                        binding.tvDetectionBannerCost.text = "Fix: ₹${top.estimatedRepairCost ?: "---"}"
+                    } else {
+                        binding.detectionBanner.visibility = android.view.View.GONE
+                    }
+                } else {
+                    binding.tvDetectionStatus.text = "🟢 AI Scanning road surface..."
+                    binding.tvDetectionStatus.setTextColor(android.graphics.Color.parseColor("#64748B"))
+                    binding.detectionBanner.visibility = android.view.View.GONE
+                }
+
                 // Update GPS Telemetry HUD
                 val tel = locationTracker.currentTelemetry
                 binding.tvGpsStatus.text = String.format(
@@ -273,7 +297,9 @@ class MainActivity : AppCompatActivity() {
                             lon = tel.longitude,
                             heading = tel.heading,
                             speed = tel.speedKmh,
-                            imageSnippetBase64 = det.croppedSnippetBase64
+                            imageSnippetBase64 = det.croppedSnippetBase64,
+                            estimatedDiameterCm = det.estimatedDiameterCm?.toFloat(),
+                            estimatedRepairCost = det.estimatedRepairCost?.toFloat()
                         )
 
                         tripEventsCount++
@@ -300,11 +326,14 @@ class MainActivity : AppCompatActivity() {
                 type = "POTHOLE",
                 confidence = 0.89f,
                 boundingBox = RectF(0.30f, 0.50f, 0.70f, 0.78f),
-                croppedSnippetBase64 = null
+                croppedSnippetBase64 = null,
+                estimatedDiameterCm = 45,
+                estimatedRepairCost = 1850
             )
 
         binding.overlayView.setDetections(listOf(testResult))
-        Toast.makeText(this, "⚡ Pothole Detected & Boxed (89%)", Toast.LENGTH_SHORT).show()
+        val diameterDisplay = if (testResult.estimatedDiameterCm != null) " • Ø ${testResult.estimatedDiameterCm} cm (₹${testResult.estimatedRepairCost})" else ""
+        Toast.makeText(this, "⚡ Pothole Detected & Boxed$diameterDisplay", Toast.LENGTH_SHORT).show()
 
         val activeSessionId = pairingManager.getActiveSessionId()
         if (activeSessionId != null) {
@@ -317,7 +346,9 @@ class MainActivity : AppCompatActivity() {
                 lon = tel.longitude,
                 heading = tel.heading,
                 speed = tel.speedKmh,
-                imageSnippetBase64 = testResult.croppedSnippetBase64
+                imageSnippetBase64 = testResult.croppedSnippetBase64,
+                estimatedDiameterCm = testResult.estimatedDiameterCm?.toFloat(),
+                estimatedRepairCost = testResult.estimatedRepairCost?.toFloat()
             )
             tripEventsCount++
             binding.tvTripEvents.text = "Trip Events: $tripEventsCount"
