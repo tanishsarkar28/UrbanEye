@@ -7,4 +7,6 @@
     <color name="gov_emerald">#10B981</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
+    <!-- App launcher icon background — matches UrbanEye logo dark background -->
+    <color name="ic_launcher_background">#111111</color>
 </resources>
