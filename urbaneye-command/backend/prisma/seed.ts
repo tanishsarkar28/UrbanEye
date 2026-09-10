@@ -131,14 +131,14 @@ async function main() {
     },
   });
 
-  // Punjab Districts (Kapurthala / LPU, Jalandhar, Ludhiana)
+  // Punjab Districts (Kapurthala, Jalandhar, Ludhiana)
   const kapurthala = await prisma.district.create({
     data: {
       code: 'KAPURTHALA',
-      name: 'Kapurthala (LPU / Phagwara)',
+      name: 'Kapurthala',
       stateId: pb.id,
       centerLat: 31.2536,
-      centerLon: 75.7037, // LPU Main Campus coordinates along NH-44
+      centerLon: 75.7037, // NH-44 Corridor
       minLat: 31.10,
       maxLat: 31.60,
       minLon: 75.20,
@@ -227,7 +227,7 @@ async function main() {
     data: {
       email: 'head.kapurthala@urbaneye.gov.in',
       passwordHash,
-      name: 'Er. Gurpreet Singh (Kapurthala / LPU Road Commissioner)',
+      name: 'Er. Gurpreet Singh (Kapurthala Road Commissioner)',
       role: 'DISTRICT_HEAD',
       stateId: pb.id,
       districtId: kapurthala.id,
