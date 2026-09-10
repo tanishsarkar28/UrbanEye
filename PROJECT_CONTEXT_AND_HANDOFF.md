@@ -1,6 +1,6 @@
 # UrbanEye — Comprehensive Project State, Conversation History & AI Handoff Document
 
-> **Last Updated:** 2026-09-07 (Local Time)  
+> **Last Updated:** 2026-09-10 (Local Time)  
 > **Repository:** `https://github.com/tanishsarkar28/UrbanEye.git`  
 > **Workspace Root:** `c:\Users\sarka\OneDrive\Documents\Codes\Projects\UrbanEye + App`  
 > **Branch:** `main`
@@ -294,3 +294,49 @@ For testing different roles and routing behaviors:
    git commit -m "feat: redesign post-login experience and add landing page theme toggle"
    git push origin main
    ```
+
+---
+
+### Request 13: Password Show/Hide Eye Toggle on Login
+- **User Prompt**: `add a eye button to see the password typed is correct or not`
+- **Actions Taken**:
+  - Added `showPassword` state to `Login.tsx`.
+  - Wrapped the password `<input>` in a `position: relative` container.
+  - Added an absolutely-positioned toggle button (44px touch target) using Lucide `Eye`/`EyeOff` icons.
+  - Input `type` toggles between `password` and `text`; `paddingRight: 44px` prevents text underlapping the button.
+  - Button turns teal (#2dd4bf) on hover, matching design system.
+- **Also fixed**: Backend was not running, causing "Login failed". Started backend (`npm run dev` in `urbaneye-command/backend`).
+- **Commit**: `feat(login): add password show/hide eye toggle`
+- **Pushed to GitHub**: Yes (user explicitly requested push).
+
+### Request 14: Single Source-of-Truth Detection Category Color & Priority Config
+- **User Prompt**: Create a unified color/priority system for all 11 detection categories (5 live Phase 1, 3 Phase 2, 3 Phase 3) and apply it everywhere.
+- **Actions Taken**:
+  1. **Created `urbaneye-command/web/src/constants/detectionCategories.ts`** — master config array of 11 categories with `code`, `displayName`, `phase`, `hex`, and `priority`. Phase 2/3 entries are reserved config slots only (no detection logic). Exports `getCategoryColor()`, `getCategoryDisplayName()`, `getCategoryPriority()`, and `MAX_CATEGORY_PRIORITY`.
+  2. **Updated `DefectTable.tsx`** — replaced 10-case `getTypeBadge()` switch-case with a single config-driven inline-style badge. Any new category in the config automatically gets the right badge color without touching this file.
+  3. **Updated `LiveMap.tsx`** — added `zIndexOffset = (MAX_PRIORITY - categoryPriority) * 100` to each Leaflet marker. Higher-priority categories (lower priority number) always render on top generically, future phases slot in automatically.
+  4. **Updated `OverlayView.kt`** — corrected Android bounding-box colors: POTHOLE changed from red → orange (#f97316), ROAD_CRACK/WATERLOGGING corrected, SURFACE_DAMAGE changed from orange → ochre (#92400e), VEHICLE_FLOW explicit case added.
+- **Color Audit Result**: Red (`#dc2626`) and Rose (`#e11d48`) are now 100% reserved for Phase 3 INCIDENT/ANPR. No live Phase 1 category uses red or rose.
+- **Commit**: `feat: single-source-of-truth detection category color/priority config`
+- **Git status**: Local commit only, not yet pushed.
+
+---
+
+## 7. Detection Category Registry (Reference)
+
+All detection colors and priorities are defined in:
+`urbaneye-command/web/src/constants/detectionCategories.ts`
+
+| Priority | Code | Display Name | Phase | Hex |
+|----------|------|-------------|-------|-----|
+| 1 | `INCIDENT` | Incident / Emergency | 3 (future) | `#dc2626` Red |
+| 2 | `ANPR_FLAG` | Flagged Vehicle (ANPR) | 3 (future) | `#e11d48` Rose |
+| 3 | `POTHOLE` | Pothole | **1 (live)** | `#f97316` Orange |
+| 4 | `ROAD_CRACK` | Road Crack | **1 (live)** | `#eab308` Amber |
+| 5 | `SURFACE_DAMAGE` | Surface Wear | **1 (live)** | `#92400e` Ochre |
+| 6 | `WATERLOGGING` | Waterlogging | **1 (live)** | `#2563eb` Blue |
+| 7 | `TRAFFIC_SIGN` | Traffic Sign Issue | 2 (planned) | `#ca8a04` Gold |
+| 8 | `DIVIDER` | Divider Issue | 2 (planned) | `#0891b2` Cyan |
+| 9 | `ZEBRA_CROSSING` | Zebra Crossing Issue | 2 (planned) | `#059669` Emerald |
+| 10 | `VEHICLE_DETECTION` | Vehicle Detection | 2 (planned) | `#4f46e5` Indigo |
+| 11 | `VEHICLE_FLOW` | Traffic Stream (density) | **1 (live)** | `#7c3aed` Purple |
