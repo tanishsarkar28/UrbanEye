@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { RoadEvent, EventStatus, DefectType } from '../types';
 import { Eye, CheckCircle2, Wrench, AlertTriangle, Image as ImageIcon, Trash2, MapPin, Bus, Clock } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { getCategoryColor, getCategoryDisplayName } from '../constants/detectionCategories';
 
 interface DefectTableProps {
   events: RoadEvent[];
@@ -119,33 +120,28 @@ export const DefectTable: React.FC<DefectTableProps> = ({
     }
   };
 
+  /**
+   * Config-driven type badge — colors sourced from detectionCategories.ts.
+   * No hex values are hardcoded here; adding a new category to the config
+   * automatically gives it the correct badge color in this table.
+   */
   const getTypeBadge = (type: DefectType) => {
-    if (isDark) {
-      switch (type) {
-        case 'POTHOLE':
-          return <span className="font-semibold text-red-300 bg-red-900/40 px-2 py-0.5 rounded border border-red-800 text-xs">Pothole</span>;
-        case 'ROAD_CRACK':
-          return <span className="font-semibold text-amber-300 bg-amber-900/40 px-2 py-0.5 rounded border border-amber-800 text-xs">Road Crack</span>;
-        case 'SURFACE_DAMAGE':
-          return <span className="font-semibold text-orange-300 bg-orange-900/40 px-2 py-0.5 rounded border border-orange-800 text-xs">Surface Wear</span>;
-        case 'WATERLOGGING':
-          return <span className="font-semibold text-blue-300 bg-blue-900/40 px-2 py-0.5 rounded border border-blue-800 text-xs">Waterlogging</span>;
-        case 'VEHICLE_FLOW':
-          return <span className="font-semibold text-purple-300 bg-purple-900/40 px-2 py-0.5 rounded border border-purple-800 text-xs">Traffic Stream</span>;
-      }
-    }
-    switch (type) {
-      case 'POTHOLE':
-        return <span className="font-semibold text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-200 text-xs">Pothole</span>;
-      case 'ROAD_CRACK':
-        return <span className="font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 text-xs">Road Crack</span>;
-      case 'SURFACE_DAMAGE':
-        return <span className="font-semibold text-orange-700 bg-orange-50 px-2 py-0.5 rounded border border-orange-200 text-xs">Surface Wear</span>;
-      case 'WATERLOGGING':
-        return <span className="font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 text-xs">Waterlogging</span>;
-      case 'VEHICLE_FLOW':
-        return <span className="font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200 text-xs">Traffic Stream</span>;
-    }
+    const hex = getCategoryColor(type);
+    const label = getCategoryDisplayName(type);
+    // Derive a subtle translucent background from the category hex
+    const bgAlpha = isDark ? '22' : '18'; // ~13% opacity hex suffix
+    return (
+      <span
+        className="font-semibold px-2 py-0.5 rounded text-xs"
+        style={{
+          color: hex,
+          backgroundColor: `${hex}${bgAlpha}`,
+          border: `1px solid ${hex}55`,
+        }}
+      >
+        {label}
+      </span>
+    );
   };
 
   return (

@@ -57,13 +57,17 @@ class OverlayView @JvmOverloads constructor(
                 box.bottom * viewHeight
             )
 
-            // Distinct color by defect type
+            // Distinct color by defect type — matches detectionCategories.ts hex table exactly.
+            // Phase 1 live categories only; future phases will add cases here when implemented.
             val color = when (detection.type) {
-                "POTHOLE" -> Color.rgb(239, 68, 68) // Bright Red
-                "ROAD_CRACK" -> Color.rgb(245, 158, 11) // Amber
-                "SURFACE_DAMAGE" -> Color.rgb(249, 115, 22) // Orange
-                "WATERLOGGING" -> Color.rgb(59, 130, 246) // Blue
-                else -> Color.rgb(168, 85, 247) // Purple
+                // PHASE 1 — LIVE
+                "POTHOLE"        -> Color.rgb(249, 115,  22) // #f97316 Orange
+                "ROAD_CRACK"     -> Color.rgb(234, 179,   8) // #eab308 Amber
+                "SURFACE_DAMAGE" -> Color.rgb(146,  64,  14) // #92400e Ochre
+                "WATERLOGGING"   -> Color.rgb( 37,  99, 235) // #2563eb Blue
+                "VEHICLE_FLOW"   -> Color.rgb(124,  58, 237) // #7c3aed Purple
+                // Unknown / future category — neutral slate
+                else             -> Color.rgb(100, 116, 139) // #64748b Slate-500
             }
             boxPaint.color = color
 

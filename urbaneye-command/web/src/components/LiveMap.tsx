@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { RoadEvent, EventStatus } from '../types';
 import { ChevronUp, ChevronDown, Layers } from 'lucide-react';
+import { getCategoryPriority, MAX_CATEGORY_PRIORITY } from '../constants/detectionCategories';
 
 interface LiveMapProps {
   events: RoadEvent[];
@@ -177,7 +178,20 @@ export const LiveMap: React.FC<LiveMapProps> = ({
         popupAnchor: [0, -18],
       });
 
-      const marker = L.marker([event.latitude, event.longitude], { icon: customIcon });
+      /**
+       * Priority-based z-index layering.
+       * Formula: (MAX_PRIORITY - categoryPriority) * 100
+       * → priority-1 (Incident) gets offset 1000, priority-11 (Vehicle Flow) gets offset 0.
+       * This is generic: any future Phase 2/3 category automatically slots in at the
+       * correct visual depth without further changes to this file.
+       */
+      const categoryPriority = getCategoryPriority(event.type);
+      const zOffset = (MAX_CATEGORY_PRIORITY - categoryPriority) * 100;
+
+      const marker = L.marker([event.latitude, event.longitude], {
+        icon: customIcon,
+        zIndexOffset: zOffset,
+      });
 
       marker.on('click', () => {
         if (onSelectEvent) {
